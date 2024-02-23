@@ -1,0 +1,48 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Script File
+//
+//      File: Recsum
+//   Authors: ClayAmore
+//   Version: 
+//   Purpose: Recalculate checksums then saves with backup.
+//  Category: 
+//   History: 
+//------------------------------------------------
+
+int i = 0;
+uint64 offset;
+int slots_count = 0;
+int active_slots_offset = 0x1901D04;
+uchar buffer[0x280000];
+uchar result[0x10];
+string og_name = GetFileName();
+
+// Save backup
+FileSave(og_name+"."+GetCurrentDateTime("dd_MM_yyyy_zzz"));
+
+// Count active slots
+while(i < 10) {
+    if((ReadByte(active_slots_offset + 0x1*i)) == 1) slots_count++;
+    i++;
+}
+
+// Recalculate checksum for character slots
+i = 0;
+while(i < slots_count) {
+    offset = 0x300 + (0x280010 * i);
+    SetCursorPos( offset );
+    ReadBytes(buffer, offset + 0x10, 0x280000);
+    ChecksumAlgArrayBytes( CHECKSUM_MD5, result, buffer, 0x280000);
+    WriteBytes(result, offset, 0x10);
+    i++;
+}
+
+// Recalculate checksum for USER_DATA_10
+offset = 0x300 + (0x280010 * 10);
+SetCursorPos( offset );
+ReadBytes(buffer, offset + 0x10, 0x60000);
+ChecksumAlgArrayBytes( CHECKSUM_MD5, result, buffer, 0x60000);
+WriteBytes(result, offset, 0x10);
+
+// Save file
+FileSave(og_name);
