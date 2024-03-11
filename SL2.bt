@@ -82,7 +82,11 @@ typedef struct {
 // CS::PlayerGameData+0x1B8 (7FF49FC3A6D0+0x1B8)
 // Length 0xD0
 typedef struct {
-} PlayerGameData2 <size=0xD0>;
+    uint32 speffect_id;
+    uint32 unk;
+    uint32 unk;
+    uint32 unk;
+} SPEffects;
 
 
 // Equip Game Data
@@ -364,7 +368,7 @@ typedef struct  {
     uint32 unk;
 } GaitemGameDataEntry <size=0x10>;
 typedef struct {
-    int32 unk;
+    int32 distinct_aquired_items_count;
     int32 unk;
     GaitemGameDataEntry entry[0x1B58];
 } GaitemGameData <size=((0x1B58*0x10)+0x8)>;
@@ -507,7 +511,7 @@ struct Slot {
     byte unk[0x18];
     Item gaitem_handle_to_item_id_map[0x1400] <optimize=false>;
     PlayerGameData player_game_data <bgcolor=0xf1c40f>;
-    PlayerGameData2 player_game_data2 <bgcolor=0xd35400>;
+    SPEffects speffects[0xd] <bgcolor=0xd35400>;
     EquipGameData equip_data <bgcolor=0x000020>;
     ChrAsm chr_asm <bgcolor=0xc0392b>;
     ChrAsm2 chr_asm_2 <bgcolor=0xecf0f1>;
