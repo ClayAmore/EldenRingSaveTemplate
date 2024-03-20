@@ -114,7 +114,7 @@ typedef struct {
     int32 Talisman2;
     int32 Talisman3;
     int32 Talisman4;
-} EquipGameData <size=0x58>;
+} MenuEquippedItems <size=0x58>;
 
 
 // Chr Asm
@@ -154,11 +154,30 @@ typedef struct {
 
 // Chr Asm
 // CS::ChrAsm+0x24 (7FF49FC3A9F0+0x24)
-// Length 0x74
-// Can't figure out what these values are supposed to be, but 
-// they are related to equipped weapons etc...
+// Length 0x58
 typedef struct {
-    int32 unk[0x16] <format=hex>;
+    uint32 LeftHandArmament1 <format=hex>;
+    uint32 RightHandArmament1 <format=hex>;
+    uint32 LeftHandArmament2 <format=hex>;
+    uint32 RightHandArmament2 <format=hex>;
+    uint32 LeftHandArmament3 <format=hex>;
+    uint32 RightHandArmament3 <format=hex>;
+    uint32 Arrows1 <format=hex>;
+    uint32 Arrows2 <format=hex>;
+    uint32 Bolts1 <format=hex>;
+    uint32 Bolts2 <format=hex>;
+    uint32 unk <format=hex>;
+    uint32 unk1 <format=hex>;
+    uint32 Head <format=hex>;
+    uint32 Chest <format=hex>;
+    uint32 Arms <format=hex>;
+    uint32 Legs <format=hex>;
+    uint32 unk2 <format=hex>;
+    uint32 Talisman1 <format=hex>;
+    uint32 Talisman2 <format=hex>;
+    uint32 Talisman3 <format=hex>;
+    uint32 Talisman4 <format=hex>;
+    uint32 unk3 <format=hex>;
 } ChrAsm2 <size=0x58>;
 
 
@@ -177,8 +196,8 @@ typedef struct (int size, int size2) {
     EquipInventoryDataEntry common_items[size];
     uint32 distinct_key_items_count;
     EquipInventoryDataEntry key_items[size2];
-    uint32 unk1;
-    uint32 next_inventory_index;
+    uint32 latest_equipment_index; // Used for identfyin equipped items.
+    uint32 acquistion_sort_id;
 } EquipInventoryData ;
 
 
@@ -198,9 +217,8 @@ typedef struct {
 // Equip Item Data
 // CS::EquipItemData+8 (7FF49FC3ABF0+0x8)
 typedef struct {
-    uint16 item_id;
-    uint16 unk;
-    int32 unk2;
+    uint32 item_gaitem_handle <format=hex>;
+    int32 equpiment_index;
 } EquippedItem;
 typedef struct {
     EquippedItem equipped_items[0xA];
@@ -234,70 +252,52 @@ typedef struct {
 // No class name (7FF49F546888)
 // Length 0x27
 typedef struct {
-    int32 LeftHandArmament1;
-    int32 RightHandArmament1;
-    int32 LeftHandArmament2;
-    int32 RightHandArmament2;
-    int32 LeftHandArmament3;
-    int32 RightHandArmament3;
-    int32 Arrows1;
-    int32 Bolts1;
-    int32 Arrows2;
-    int32 Bolts2;
-    int32 unk1;
-    int32 unk2;
-    int32 Head;
-    int32 Chest;
-    int32 Arms;
-    int32 Legs;
-    int32 unk3;
-    int32 Talisman1;
-    int32 Talisman2;
-    int32 Talisman3;
-    int32 Talisman4;
-    int32 unk3; //Most likely covenant.
-    int16 QuickItem1;
-    int16 padding;
-    int16 QuickItem2;
-    int16 padding;
-    int16 QuickItem3;
-    int16 padding;
-    int16 QuickItem4;
-    int16 padding;
-    int16 QuickItem5;
-    int16 padding;
-    int16 QuickItem6;
-    int16 padding;
-    int16 QuickItem7;
-    int16 padding;
-    int16 QuickItem8;
-    int16 padding;
-    int16 QuickItem9;
-    int16 padding;
-    int16 QuickItem10;
-    int16 padding;
-    int16 Pouch1;
-    int16 padding;
-    int16 Pouch2;
-    int16 padding;
-    int16 Pouch3;
-    int16 padding;
-    int16 Pouch4;
-    int16 padding;
-    int16 Pouch5;
-    int16 padding;
-    int16 Pouch6;
-    int16 padding;
+    int32 LeftHandArmament1 <format=hex>;
+    int32 RightHandArmament1 <format=hex>;
+    int32 LeftHandArmament2 <format=hex>;
+    int32 RightHandArmament2 <format=hex>;
+    int32 LeftHandArmament3 <format=hex>;
+    int32 RightHandArmament3 <format=hex>;
+    int32 Arrows1 <format=hex>;
+    int32 Bolts1 <format=hex>;
+    int32 Arrows2 <format=hex>;
+    int32 Bolts2 <format=hex>;
+    int32 unk1 <format=hex>;
+    int32 unk2 <format=hex>;
+    int32 Head <format=hex>;
+    int32 Chest <format=hex>;
+    int32 Arms <format=hex>;
+    int32 Legs <format=hex>;
+    int32 unk3 <format=hex>;
+    int32 Talisman1 <format=hex>;
+    int32 Talisman2 <format=hex>;
+    int32 Talisman3 <format=hex>;
+    int32 Talisman4 <format=hex>;
+    int32 unk3 <format=hex>; 
+    int32 QuickItem1 <format=hex>;
+    int32 QuickItem2 <format=hex>;
+    int32 QuickItem3 <format=hex>;
+    int32 QuickItem4 <format=hex>;
+    int32 QuickItem5 <format=hex>;
+    int32 QuickItem6 <format=hex>;
+    int32 QuickItem7 <format=hex>;
+    int32 QuickItem8 <format=hex>;
+    int32 QuickItem9 <format=hex>;
+    int32 QuickItem10 <format=hex>;
+    int32 Pouch1 <format=hex>;
+    int32 Pouch2 <format=hex>;
+    int32 Pouch3 <format=hex>;
+    int32 Pouch4 <format=hex>;
+    int32 Pouch5 <format=hex>;
+    int32 Pouch6 <format=hex>;
 } AnotherEquippedItems <size=(0x27*0x4)>;
 
 // Equipped Physic
 // No class name (7FF49FC3AD44)
 // Length 0xC
 typedef struct {
-    uint16 slot1;
-    uint16 padding;
-    uint16 slot2;
-    uint16 padding;
+    int32 slot1;
+    int32 slot2;
 } PhysicEquipData <size=0xC>;
 
 // Face Data
@@ -364,13 +364,13 @@ typedef struct {
 typedef struct  {
     uint32 id <format=hex>;
     uint32 unk <format=hex>;
-    uint32 reinforce_type_id;
+    uint32 equpiment_index_or_reinforce_type_id;
     uint32 unk;
 } GaitemGameDataEntry <size=0x10>;
 typedef struct {
     int32 distinct_aquired_items_count;
     int32 unk;
-    GaitemGameDataEntry entry[0x1B58];
+    GaitemGameDataEntry item[0x1B58];
 } GaitemGameData <size=((0x1B58*0x10)+0x8)>;
 
 // Tutorial Data
@@ -512,10 +512,10 @@ struct Slot {
     Item gaitem_handle_to_item_id_map[0x1400] <optimize=false>;
     PlayerGameData player_game_data <bgcolor=0xf1c40f>;
     SPEffects speffects[0xd] <bgcolor=0xd35400>;
-    EquipGameData equip_data <bgcolor=0x000020>;
+    MenuEquippedItems menu_equipped_items <bgcolor=0x000020>;
     ChrAsm chr_asm <bgcolor=0xc0392b>;
     ChrAsm2 chr_asm_2 <bgcolor=0xecf0f1>;
-    EquipInventoryData equipped_items(0xA80, 0x180);
+    EquipInventoryData inventory_held(0xA80, 0x180);
     EquipMagicData equip_magic_data;
     EquipItemData equip_item_data;
     GestureEquipData gesture_equip_data;
@@ -523,7 +523,7 @@ struct Slot {
     AnotherEquippedItems another_equipped_items_list;
     PhysicEquipData physic_equip_data;
     FaceData face_data;
-    EquipInventoryData storage_box_items(0x780, 0x80);
+    EquipInventoryData inventory_storage_box(0x780, 0x80);
     GestureGameData gesture_game_data;
     UnlockedRegions unlocked_regions;
     RideGameData ride_game_data;
