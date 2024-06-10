@@ -303,13 +303,6 @@ typedef struct {
 // Face Data
 // CS::FaceData (7FF49FC3AE10)
 // Length 0x12F
-//typedef struct {
-//    int32 face_data_0x150;
-//    byte face_data_0x8[0x120];
-//   byte face_data_0x128_not_eq_0x0; 
-//    int16 face_data_0x128;
-//    int64 face_data_0x130;
-//} FaceData <size=0x12F>;
 typedef struct {
     uint64 unk01;
     uint64 unk02;
