@@ -17,9 +17,6 @@ uchar buffer[0x280000];
 uchar result[0x10];
 string og_name = GetFileName();
 
-// Save backup
-FileSave(og_name+"."+GetCurrentDateTime("dd_MM_yyyy_zzz"));
-
 // Count active slots
 while(i < 10) {
     if((ReadByte(active_slots_offset + 0x1*i)) == 1) slots_count++;
