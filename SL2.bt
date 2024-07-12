@@ -958,8 +958,8 @@ typedef byte SlotState[10] <read=Str(
 
 typedef struct {
     // Most likely vtable pointer
-    uint32 unk0x0 <hidden = true>; Assert(unk0x0 == 0xFFFFFFFF);
-    uint32 unk0x4 <hidden = true>; Assert(unk0x4 == 0);
+    uint32 unk0x0 <hidden = true>;
+    uint32 unk0x4 <hidden = true>;
     
     ArmStyleAndActiveWeaponSlots ActiveEquippedWeaponsSlots;
     DisplayFormatHex();
