@@ -23,6 +23,7 @@ typedef struct {
     float Z;
 } FloatVector3 <read=Str("(%.1f, %.1f, %.1f)", X, Y, Z)>;
 
+// Angle
 typedef struct {
     float X;
     float Y;
@@ -96,7 +97,7 @@ typedef struct {
     uint32 Intelligence;
     uint32 Faith;
     uint32 Arcane;
-    uint32 unk0x54 <hidden = true>;
+    uint32 Humanity;
     uint32 unk0x58 <hidden = true>;
     uint32 unk0x5C <hidden = true>;
     uint32 Level;
@@ -181,7 +182,7 @@ typedef struct {
     uint32 Talisman2;
     uint32 Talisman3;
     uint32 Talisman4;
-    uint32 unk0x54 <hidden = true>;
+    uint32 Talisman5 <hidden = true>;
 } ChrAsmEquipment;
 
 
@@ -226,12 +227,8 @@ typedef struct {
     int32 unk0x4;
 } SpellSlot;
 typedef struct {
-    // Max is 12. Moon Of Nokstella Talisman adds two additional spots 
-    SpellSlot SpellSlots[0xC] <read=Str("%d", this.SpellID)>;
-    uint32 unk0x60 <hidden = true>;
-    uint32 unk0x64 <hidden = true>;
-    uint32 unk0x68 <hidden = true>;
-    uint32 unk0x70 <hidden = true>;
+    // Max is 14. 
+    SpellSlot SpellSlots[0xE] <read=Str("%d", this.SpellID)>;
     int32 ActiveIndex;
 } EquipMagicData;
 
@@ -328,15 +325,220 @@ typedef struct {
 // Face Data
 // CS::FaceData
 // Length 0x12F
-typedef struct {
-    int32 unk0x0 <hidden = true>;
-    char magic[4] <hidden = true>;
-    Assert(magic == "FACE");
-    byte face_data_0x8[0x11c];
-    byte face_data_0x128_not_eq_0x0 <hidden = true>; 
-    int16 face_data_0x128 <hidden = true>;
-    int64 face_data_0x12a <hidden = true>;
-} FaceData <size=0x12F>;
+typedef struct (byte isInProfileSummary) {
+    int32 FaceData0x150 <hidden = true>; Assert(FaceData0x150 == -1 || FaceData0x150 == 0);
+    
+    char Magic[4];
+    Assert(Magic == "FACE" || Magic == "");
+    uint32 Alignment;
+    uint32 Size <format = hex>;
+    
+    ubyte FaceModel;
+    ubyte Padding[3] <hidden = true>;
+    
+    ubyte HairModel;
+    ubyte Padding1[3] <hidden = true>;
+    
+    ubyte unk0x14 < hidden = true>;
+    ubyte Padding2[3] <hidden = true>;
+    
+    ubyte EyeBrowModel;
+    ubyte Padding3[3] <hidden = true>;
+    
+    ubyte BeardModel;
+    ubyte Padding4[3] <hidden = true>;
+    
+    ubyte EyePatchModel;
+    ubyte Padding5[3] <hidden = true>;
+    
+    ubyte unk0x24;
+    ubyte Padding6[3] <hidden = true>;
+    
+    ubyte unk0x28;
+    ubyte Padding7[3] <hidden = true>;
+    
+    ubyte ApparentAge;
+    ubyte FacialAesthetic;
+    ubyte FormEmphasis;
+    ubyte unk0xf;
+    ubyte BrowRidgeHeight;
+    ubyte InnerBrowRidge;
+    ubyte OuterBrowRidge;
+    ubyte CheekboneHeight;
+    ubyte CheekboneDepth;
+    ubyte CheekboneWidth;
+    ubyte CheekboneProstrution;
+    ubyte Cheeks;
+    ubyte ChinTipPosition;
+    ubyte ChinLength;
+    ubyte ChinProstrusion;
+    ubyte ChinDepth;
+    ubyte ChinSize;
+    ubyte ChinHeight;
+    ubyte ChinWidth;
+    ubyte EyePosition;
+    ubyte EyeSize;
+    ubyte EyeSlant;
+    ubyte EyeSpacing;
+    ubyte NoseSize;
+    ubyte NoseForeheadRatio;
+    
+    ubyte unk0x45;
+    
+    ubyte FaceProtrusion;
+    ubyte VerticalFaceRatio;
+    ubyte FacialFeatureSlant;
+    ubyte HorizontalFaceRatio;
+    
+    ubyte unk0x4a;
+    
+    ubyte ForeheadDepth;
+    ubyte ForeheadProtrusion;
+    
+    ubyte unk0x4d;
+    
+    ubyte JawProstrusion;
+    ubyte JawWidth;
+    ubyte LowerJaw;
+    ubyte JawContour;
+    ubyte LipShape;
+    ubyte LipSize;
+    ubyte LipFullness;
+    ubyte MouthExpression;
+    ubyte LipProstrusion;
+    ubyte LipThickness;
+    ubyte MouthProstrusion;
+    ubyte MouthSlant;
+    ubyte Occulsion;
+    ubyte MouthPosition;
+    ubyte MouthWidth;
+    ubyte MouthChinDistance;
+    ubyte NoseRidgeDepth;
+    ubyte NoseRidgeLength;
+    ubyte NosePosition;
+    ubyte NoseTipHeight;
+    ubyte NostrilSlant;
+    ubyte NostrilSize;
+    ubyte NostrilWidth;
+    ubyte NoseProstrution;
+    ubyte NoseBridgeHeight;
+    ubyte BridgeProtrusion1;
+    ubyte BridgeProtrusion2;
+    ubyte NoseBridgeWidth;
+    ubyte NoseHeight;
+    ubyte NoseSlant;
+    
+    ubyte unk0x6c[64];
+    
+    ubyte HeadSize;
+    ubyte ChestSize;
+    ubyte AbdomenSize;
+    ubyte ArmsSize;
+    ubyte LegsSize;
+    
+    ubyte unk0xb1[2];
+    
+    ubyte SkinColorR;
+    ubyte SkinColorG;
+    ubyte SkinColorB;
+    ubyte SkinLuster;
+    ubyte Pores;
+    ubyte Stubble;
+    ubyte DarkCircles;
+    ubyte DarkCircleColorR;
+    ubyte DarkCircleColorG;
+    ubyte DarkCircleColorB;
+    ubyte CheeksColorIntensity;
+    ubyte CheekColorR;
+    ubyte CheekColorG;
+    ubyte CheekColorB;
+    ubyte EyeLiner;
+    ubyte EyeLinerColorR;
+    ubyte EyeLinerColorG;
+    ubyte EyeLinerColorB;
+    ubyte EyeShadowLower;
+    ubyte EyeShadowLowerColorR;
+    ubyte EyeShadowLowerColorG;
+    ubyte EyeShadowLowerColorB;
+    ubyte EyeShadowUpper;
+    ubyte EyeShadowUpperColorR;
+    ubyte EyeShadowUpperColorG;
+    ubyte EyeShadowUpperColorB;
+    ubyte LipStick;
+    ubyte LipStickColorR;
+    ubyte LipStickColorG;
+    ubyte LipStickColorB;
+    ubyte TattoMarkPositionHorizontal;
+    ubyte TattoMarkPositionVertical;
+    ubyte TattoMarkAngle;
+    ubyte TattoMarkExpansion;
+    ubyte TattoMarkColorR;
+    ubyte TattoMarkColorG;
+    ubyte TattoMarkColorB;
+    
+    ubyte unk0xd8;
+    
+    ubyte TattoMarkFlip;
+    ubyte BodyHair;
+    ubyte BodyHairColorR;
+    ubyte BodyHairColorG;
+    ubyte BodyHairColorB;
+    ubyte RighIrisColorR;
+    ubyte RighIrisColorG;
+    ubyte RighIrisColorB;
+    ubyte RightIrisSize;
+    ubyte RightEyeClouding;
+    ubyte RightEyeCloudingColorR;
+    ubyte RightEyeCloudingColorG;
+    ubyte RightEyeCloudingColorB;
+    ubyte RightEyeWhiteColorR;
+    ubyte RightEyeWhiteColorG;
+    ubyte RightEyeWhiteColorB;
+    ubyte RightEyePosition;
+    ubyte LeftIrisColorR;
+    ubyte LeftIrisColorG;
+    ubyte LeftIrisColorB;
+    ubyte LeftIrisSize;
+    ubyte LeftEyeClouding;
+    ubyte LeftEyeCloudingColorR;
+    ubyte LeftEyeCloudingColorG;
+    ubyte LeftEyeCloudingColorB;
+    ubyte LeftEyeWhiteColorR;
+    ubyte LeftEyeWhiteColorG;
+    ubyte LeftEyeWhiteColorB;
+    ubyte LeftEyePosition;
+    ubyte HairColorR;
+    ubyte HairColorG;
+    ubyte HariColorB;
+    ubyte Luster;
+    ubyte HairRootDarkness;
+    ubyte WhiteHairs;
+    ubyte BeardColorR;
+    ubyte BeardColorG;
+    ubyte BeardColorB;
+    ubyte BeardLuster;
+    ubyte HairRootDarkness;
+    ubyte BeardWhiteHairs;
+    ubyte BrowColorR;
+    ubyte BrowColorG;
+    ubyte BrowColorB;
+    ubyte BrowLuster;
+    ubyte BrowRootDarkness;
+    ubyte BrowWhiteHairs;
+    ubyte EyeLeashColorR;
+    ubyte EyeLeashColorG;
+    ubyte EyeLeashColorB;
+    ubyte EyePatchColorR;
+    ubyte EyePatchColorG;
+    ubyte EyePatchColorB;
+    ubyte unk0x10e [0x12];
+    
+    if (isInProfileSummary == 0) {
+        byte face_data_0x128_not_eq_0x0; 
+        int16 face_data_0x128;
+        int64 face_data_0x12a;
+    }
+} FaceData;
 
 // Gesture Game Data
 // CS::GestureGameData (7FF49E380440)
@@ -467,7 +669,6 @@ typedef struct (int &pSize) {
     uint32 unk0xC <format = hex>;
     
     local int Size2 = Size - 0x10;
-    Printf("%d\n", Size2);
     if (Size2 > 0 ) {
         byte unk0x8 [Size2];
         pSize = pSize - Size;
@@ -645,62 +846,177 @@ typedef struct {
     uint16 unk0x30;
 } CSDlc;
 
-typedef struct (PlayerGameData &player) {
-    // Var1 = PlayerLevel + 1;
-    // Var2 = Var1 * 4;
-    // (Var1 | ((Var2 / 0xfff1) * 0xf + Var2) * 0x10000) * 2
+typedef struct (
+    PlayerGameData &player, 
+    ChrAsmEquipment &equipment,
+    EquippedArmamentsAndItems &equippedArmamentsAndItems,
+    EquipMagicData &equippedSpells
+    ) {
+    // Level
     uint32 Level <format = hex>;
-    local uint var1 = player.Level + 1;
-    local uint var2 = var1 * 4;
-    Assert(Level == (var1 | ((var2 / 0xfff1) * 0xf + var2) * 0x10000) * 2);
-} WeirdPlayerGameData <size = 0x80>;
+    Assert(Level == 0 || Level == ValueHash(player.Level));
+    
+    // Stats
+    uint Stats <format = hex>;
+    Assert(Stats == 0 || Stats == StatsHash(player));
+    
+    // ArcheType
+    uint ArcheType <format = hex>;
+    Assert(ArcheType == 0 || ArcheType == ValueHash(player.ArcheType));
+    
+    // PlayerGameData0xC0
+    uint PlayerGameData0xC0 <format = hex>;
+    local byte buffer[4];
+    ConvertDataToBytes(player.unk0xb8, buffer);
+    Assert(PlayerGameData0xC0 == 0 || PlayerGameData0xC0 == BytesHash(buffer, 1));
+    
+    uint32 padding <hidden = true>;
+    
+    // Souls
+    uint Souls <format = hex>;
+    Assert(Souls == 0 || Souls == ValueHash(player.Souls));
+    
+    // SoulsMemory
+    uint Soulmemory <format = hex>;
+    Assert(Soulmemory == 0 || Soulmemory == ValueHash(player.Soulmemory));
+    
+    // Equipped Weapons
+    uint EquippedWeapons <format = hex>;
+    Assert(EquippedWeapons == 0 || EquippedWeapons == EquippedWeaponsHash(equipment));
+    
+    // Equipped Weapons
+    uint EquippedArmorsAndTalismans <format = hex>;
+    Assert(EquippedArmorsAndTalismans == 0 || EquippedArmorsAndTalismans == EquippedArmorsAndTalismansHash(equipment));
+
+    // Equipped Items
+    uint EquippedItems <format = hex>;
+    Assert(EquippedItems == 0 || EquippedItems == EquippedItemsHash(equippedArmamentsAndItems));
+
+    // Equipped Spells
+    uint EquippedSpells <format = hex>;
+    Assert(EquippedSpells == 0 || EquippedSpells == EquippedSpellsHash(equippedSpells));
+} CSPlayerGameDataHash <size = 0x80>;
+
+typedef struct {
+    byte CameraSpeed;
+    byte ControllerVibration;
+    byte Brightness;
+    byte Unk0x3;
+    byte MusicVolume;
+    byte SoundEffectsVolume;
+    byte VoiceVolume;
+    byte DisplayBlood;
+    byte Subtitles;
+    byte HUD;
+    byte CameraXAxis;
+    byte CameraYAxis;
+    byte ToggleAutoLockOn;
+    byte CameraAutoWallRecovery;
+    byte Unk0xE;
+    byte Unk0xF;
+    byte ResetCameraYAxis;
+    byte CinematicEffects;
+    byte Unk0x12;
+    byte PerformMatchmaking;
+    byte Unk0x14;
+    byte Unk0x15;
+    byte ManualAttackAim;
+    byte AutoTarget;
+    byte LaunchSettings;
+    byte SendSummonSign;
+    byte Unk0x1A;
+    byte HDR;
+    byte HDRAdjustBrightness;
+    byte HDRMaximumBrightness;
+    byte HDRAdjustSaturation;
+    byte Unk0x1F;
+    byte MasterVolume;
+    byte IsRayTracingOn;
+    byte MarkNewItems;
+    byte ShowRecentTabs;
+    uint64 Unk0x24 <hidden = true>; Assert(Unk0x24 == 0);
+    uint16 Unk0x2C <hidden = true>; Assert(Unk0x2C == 0);
+    byte ShowTutorials;
+    byte CameraAutoRotation;
+    byte JustZero[0x110] <hidden = true>;
+} CSSettings;
 
 // CSMenuSystemSaveLoad
-// CS::CSMenuSystemSaveLoad (7FF4A00859D0)
-// Length 0x3D
 typedef struct {
-    uint32 unk;
-    uint32 size;
-    byte data[size]; 
-} CSMenuSystemSaveLoad;
+    uint16 Unk0x0 <hidden = true>;
+    uint16 Unk0x2 <hidden = true>;
+    uint32 Size;
+    ubyte Data[Size];
+} CSMenuSystemSaveLoad ;
 
-// CSProfileSummary
-// CS::CSProfileSummary (7FF4A0087EE0)
-// Length ??
+typedef byte SlotState[10] <read=Str(
+    "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", 
+    this[0],this[1],this[2],this[3],
+    this[4],this[5],this[6],this[7],
+    this[8],this[9]
+)>;
+
 typedef struct {
-    wchar_t chracter_name[0x11];
-    int32 level;
-    int32 _0x28;
-    int32 _0x2C;
-    int32 _0x30;
-    int32 _0x34;
-    int32 _0x38_0x150;
-    byte _0x38_0x8[0x120];
-    uint32 _0xE8[0x3A] <format=hex>;
-    byte _0x290;
-    byte _0x291;
-    byte _0x292;
-    byte _0x293;
-    byte _0x294;
-    byte _0x295;
-    int32 _0x298;
+    // Most likely vtable pointer
+    uint32 unk0x0 <hidden = true>; Assert(unk0x0 == 0xFFFFFFFF);
+    uint32 unk0x4 <hidden = true>; Assert(unk0x4 == 0);
+    
+    ArmStyleAndActiveWeaponSlots ActiveEquippedWeaponsSlots;
+    DisplayFormatHex();
+    ChrAsmEquipment EquippedItemsGaitemHandles;
+    DisplayFormatDecimal();
+    ChrAsmEquipment EquippedItemsItemIds;
+    int32 Unk0xD4 <hidden = true>; 
+    uint32 Unk0xD8 <hidden = true>;
+    uint32 Unk0xDC[3] <hidden = true>;
+    
+} ProfileSummaryChrAsm;
+
+typedef struct {
+    wchar_t CharacterName[0x11];
+    int32 Level;
+    int32 SecondsPlayed;
+    int32 RuneMemory;
+    M MapId;
+    uint32 Unk0x34;
+    FaceData Facedata(1);
+    ProfileSummaryChrAsm Equipment <format=hex>;
+    byte Gender;
+    byte ArcheType;
+    byte StartingGift;
+    byte ProfileSummaryCharacter0x293;
+    byte ProfileSummaryCharacter0x294;
+    byte ProfileSummaryCharacter0x295;
+    int32 ProfileSummaryCharacter0x298;
+} ProfileData <size = 0x24C, optimize = false> ;
+// CSProfileSummary
+typedef struct {
+    SlotState IsProfileActive;
+    ProfileData Profile[0xA];
 } CSProfileSummary;
 
 // PCOptionsData
 // CS::PCOptionsData (7FF49E1830C0)
 // Length ??
 typedef struct {
-    uint16 _0x8[0x9];
-    byte _0x1a[0xa0];
-} PCOptionsData;
+    uint32 Unk0x0;
+    ubyte Unk0xC;
+    ubyte Unk0xD;
+    ubyte Unk0xE;
+    ubyte Unk0xF;
+    uint64 Unk0x10;
+    uint16 Unk0x18;
+    uint16 Unk0x12[0xa0/2];
+} CSPCOptionData;
 
 // CSKeyConfigSaveLoad
 // CS::CSKeyConfigSaveLoad (7FF49E1830C0)
 // Length ??
 typedef struct {
-    uint32 unk;
-    uint32 size;
-    byte data[size];
+    uint16 unk0x0 <hidden = true>;
+    uint16 unk0x2 <hidden = true>;
+    uint32 Size;
+    byte Data[Size];
 } CSKeyConfigSaveLoad;
 
 struct BND4FileHeader {
@@ -755,7 +1071,7 @@ struct Slot {
     PhysicEquipData EquippedPhysics;
     
     // Face Data
-    FaceData Facedata;
+    FaceData Facedata(0);
     
     // Inventory Data (Storage Box)
     Inventory InventoryStorageBox(0x780, 0x80);
@@ -872,26 +1188,33 @@ struct Slot {
     BaseVersion BaseCharacterVersion;
     uint64 SteamId;
     
+    // PS5Activity
     CSPS5Activity PS5Activity;
     
+    // DLC
     CSDlc DLC;
     
-    WeirdPlayerGameData PlayerGameData2 (Player);
+    // Hash values calculated from the PlayerGameData
+    CSPlayerGameDataHash PlayerGameDataHash (
+        Player, 
+        EquippedItemsItemIds, 
+        EquippedArmamentsandItems,
+        EquippedSpells
+    );
 } Character[10] <optimize=false, size=0x280010, read=Str("%03d | %s", this.Player.Level, this.Player.CharacterName)>;
 
 struct USER_DATA10{
     byte Checksum[0x10] <hidden = true>;
-    uint32 unk;
-    uint64 steam_id;
-    byte unk2[0x140];
-    CSMenuSystemSaveLoad cs_menu_system_save_load;
-    byte active_slot[0xA];
-    CSProfileSummary profile_summary[0xA];
-    uint32 _0xd0;
-    byte unk;
-    PCOptionsData pc_option_data;
-    CSKeyConfigSaveLoad cs_key_config_save_load;
-    uint64 _0x118;
+    uint32 Version;
+    uint64 SteamId;
+    CSSettings Settings;
+    CSMenuSystemSaveLoad MenuSystemSaveLoad;
+    CSProfileSummary ProfileSummary;
+    uint32 GameDataMan0xd0;
+    byte GameDataMan0x75;
+    CSPCOptionData PCOptionData;
+    CSKeyConfigSaveLoad KeyConfigSaveLoad;
+    uint64 GameDataMan0x118;
 } Common <size=0x60010>;
 
 struct USER_DATA11{
@@ -899,4 +1222,155 @@ struct USER_DATA11{
     byte unk[0x10] <hidden = true>;
     byte Regulation[0x1e9fb0];
 } Regulation<size=0x24001F>;
+
+
+// =========================================
+// PlayerGameData Hash Helper Functions
+// =========================================
+
+// Calculate Hash for a 4 byte value
+uint ValueHash(uint value) {
+    local byte buffer[0x4];
+    ConvertDataToBytes(value, buffer);
+    return BytesHash(buffer, 0x4);
+}
+
+// Calculate Hash for a sized byte stream value
+uint BytesHash(byte bytes[], int size) {
+    local int i = 0; // Start
+    local int n = size; // End
+    
+    local uint lo = 1;
+    local uint hi = 0;
+    
+    while (i < n) {
+        lo = lo + (bytes[i] & 0xFF);
+        hi = hi + lo;
+        i = i + 1;
+    }
+    
+    local uint lo_hashed = ComputeHashedValue(lo);
+    local uint hi_hashed = ComputeHashedValue(hi);
+    
+    return (lo_hashed | (hi_hashed << 0x10)) * 2;    
+}
+
+// Compute the Hash
+uint ComputeHashedValue(uint input) {
+    local uint64 product = (uint64)0x80078071 * (uint64)input;
+    local uint32 upper_bits = (uint32)(product >> 32);
+    local uint32 shifted_upper_bits = upper_bits >> 15;
+    local uint32 mod_product = (uint32)((int32)shifted_upper_bits * (-0xfff1));
+    return input + mod_product;
+}
+
+// Calculate Stats Hash
+uint StatsHash(PlayerGameData &player) {
+    local int size = 0x24;
+    
+    local uint stats[9];
+    stats[0] = player.Vigor;
+    stats[1] = player.Mind;
+    stats[2] = player.Endurance;
+    stats[3] = player.Strength;
+    stats[4] = player.Dexterity;
+    stats[6] = player.Faith;
+    stats[5] = player.Intelligence;
+    stats[7] = player.Arcane;
+    stats[8] = player.Humanity;
+    
+    local byte buffer[size];
+    ConvertDataToBytes(stats, buffer);
+    return BytesHash(buffer, size);
+}
+
+// Calculate Equipped Weapons Hash
+uint EquippedWeaponsHash(ChrAsmEquipment& equipment) {
+    local int size = 0x28;
+    
+    local uint ids[10];
+    ids[0] = equipment.LeftHandArmament1;
+    ids[1] = equipment.LeftHandArmament2;
+    ids[2] = equipment.LeftHandArmament3;
+    ids[3] = equipment.RightHandArmament1;
+    ids[4] = equipment.RightHandArmament2;
+    ids[5] = equipment.RightHandArmament3;
+    ids[6] = equipment.Arrows1;
+    ids[7] = equipment.Arrows2;
+    ids[8] = equipment.Bolts1;
+    ids[9] = equipment.Bolts2;
+    
+    local byte buffer[size];
+    ConvertDataToBytes(ids, buffer);
+    return BytesHash(buffer, size);
+}
+
+// Calculate Equipped Armor and Talismans Hash
+uint EquippedArmorsAndTalismansHash(ChrAsmEquipment& equipment) {
+    local int size = 0x24;
+    local uint ids[9];
+    ids[0] = equipment.Head;
+    ids[1] = equipment.Chest;
+    ids[2] = equipment.Arms;
+    ids[3] = equipment.Legs;
+    ids[4] = equipment.Talisman1;
+    ids[5] = equipment.Talisman2;
+    ids[6] = equipment.Talisman3;
+    ids[7] = equipment.Talisman4;
+    ids[8] = equipment.Talisman5;
+    
+    local byte buffer[size];
+    ConvertDataToBytes(ids, buffer);
+    return BytesHash(buffer, size);
+}
+
+// Calculate Equipped QuickItems and PouchItems Hash
+uint EquippedItemsHash(EquippedArmamentsAndItems& equippedArmamentsAndItems) {
+    local int size = 0x40;
+    local uint ids[16];
+    ids[0] = equippedArmamentsAndItems.QuickItem1; 
+    ids[1] = equippedArmamentsAndItems.QuickItem2; 
+    ids[2] = equippedArmamentsAndItems.QuickItem3; 
+    ids[3] = equippedArmamentsAndItems.QuickItem4; 
+    ids[4] = equippedArmamentsAndItems.QuickItem5; 
+    ids[5] = equippedArmamentsAndItems.QuickItem6; 
+    ids[6] = equippedArmamentsAndItems.QuickItem7; 
+    ids[7] = equippedArmamentsAndItems.QuickItem8; 
+    ids[8] = equippedArmamentsAndItems.QuickItem9; 
+    ids[9] = equippedArmamentsAndItems.QuickItem10; 
+    ids[10] = equippedArmamentsAndItems.Pouch1; 
+    ids[11] = equippedArmamentsAndItems.Pouch2; 
+    ids[12] = equippedArmamentsAndItems.Pouch3; 
+    ids[13] = equippedArmamentsAndItems.Pouch4; 
+    ids[14] = equippedArmamentsAndItems.Pouch5; 
+    ids[15] = equippedArmamentsAndItems.Pouch6;
+    
+    local int i = 0;
+    while ( i < 16 ) {
+        if (ids[i] != 0xFFFFFFFF) {
+            ids[i] = ids[i] & 0x0fffffff;    
+        }
+        i = i +1;    
+    }
+    
+    local byte buffer[size];
+    ConvertDataToBytes(ids, buffer);
+    return BytesHash(buffer, size);
+}
+
+// Calculate Equipped Spells Hash
+uint EquippedSpellsHash(EquipMagicData& equippedSpells) {
+    local int size = 0x38;
+    local uint ids[14];
+    
+    local int i = 0;
+    while ( i < 14 ) {
+        ids[i] = equippedSpells.SpellSlots[i].SpellID;    
+        i = i +1;    
+    }
+    
+    local byte buffer[size];
+    ConvertDataToBytes(ids, buffer);
+    return BytesHash(buffer, size);
+}
 
