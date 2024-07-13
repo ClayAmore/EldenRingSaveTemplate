@@ -11,45 +11,84 @@
 //   History: 
 //------------------------------------------------
 
+local enum Boolean {
+    False = 0,
+    True = 1
+};
+
+// Coordinates
+typedef struct {
+    float X;
+    float Y;
+    float Z;
+} FloatVector3 <read=Str("(%.1f, %.1f, %.1f)", X, Y, Z)>;
+
+// Angle
+typedef struct {
+    float X;
+    float Y;
+    float Z;
+    float W;
+} FloatVector4 <read=Str("(%.1f, %.1f, %.1f, %.1f)", X, Y, Z, W)>;
+
+// MapID
+typedef byte M[4] <read=Str("%02d %02d %02d %02d",this[3],this[2],this[1],this[0])>;
+
 // Items 
 // Global CS::GaItem starts at (143ce0680 + 0x8)
 // Length 0x1400
 // Used for lookup of item ids from ga_item_handle maybe
 // Ashes of War are first
 typedef struct Item {
-    int32 ga_item_handle<format=hex>;
+    int32 GaitemHandle<format=hex>;
+    Assert(
+        (GaitemHandle & 0xF0000000) == 0 ||
+        (GaitemHandle & 0xF0000000) == 0x80000000 ||
+        (GaitemHandle & 0xF0000000) == 0x90000000 ||
+        (GaitemHandle & 0xF0000000) == 0xC0000000
+    );
     int32 ItemID<format=hex>;
+    Assert(
+        (ItemID == 0xFFFFFFFF) ||
+        (ItemID & 0xF0000000) == 0 ||
+        (ItemID & 0xF0000000) == 0x10000000 ||
+        (ItemID & 0xF0000000) == 0x80000000
+    );
     // Additional data for type = Weapon
-    if ( (ItemID != 0) && ((ItemID & 0xf0000000) == 0)) { 
-        int32 unk; 
-        int32 unk2;
-        int32 ash_of_war_ga_item_handle<format=hex>;
-        byte unk4;
+    if ((GaitemHandle != 0) && ((GaitemHandle & 0xf0000000) == 0x80000000)) { 
+        int32 unk0x10; 
+        int32 unk0x14;
+        uint32 AOWGaitemHandle<format=hex>;
+        Assert(
+            AOWGaitemHandle == 0 ||
+            (AOWGaitemHandle & 0xF0000000) == 0xC0000000
+        );
+        byte unk0x1c; Assert(unk0x1c == 0);
     }
     // Additional data for type = Armor
-    else if((ItemID != 0) && ((ItemID & 0xf0000000) == 0x10000000)) { 
-        int32 unk;
-        int32 unk2;
+    else if((GaitemHandle != 0) && ((GaitemHandle & 0xf0000000) == 0x90000000)) { 
+        int32 unk0x10; 
+        int32 unk0x14;
     }
 };
 
 // Player Game Data
-// CS::PlayerGameData+0x8 (7FF49FC3A6D0+0x8)
+// CS::PlayerGameData+0x8
 // Length 0x1B0
 typedef struct {
-    uint32 unk;
-    uint32 unk1;
+    uint32 unk0x0 <hidden = true>;
+    uint32 unk0x4 <hidden = true>;
     uint32 Health;
     uint32 MaxHealth;
     uint32 BaseMaxHealth;
     uint32 FP;
     uint32 MaxFP;
     uint32 BaseMaxFP;
-    uint32 unk2;
+    uint32 unk0x20 <hidden = true>;
     uint32 SP;
     uint32 MaxSP;
     uint32 BaseMaxSP;
-    uint32 unk3;
+    uint32 unk0x30 <hidden = true>;
     uint32 Vigor;
     uint32 Mind;
     uint32 Endurance;
@@ -58,68 +97,98 @@ typedef struct {
     uint32 Intelligence;
     uint32 Faith;
     uint32 Arcane;
-    uint32 unk4[0x3];
+    uint32 Humanity;
+    uint32 unk0x58 <hidden = true>;
+    uint32 unk0x5C <hidden = true>;
     uint32 Level;
     uint32 Souls;
     uint32 Soulmemory;
-    byte unk5[0x28];
+    uint32 unk0x6c <hidden = true>;
+    uint32 PoisonBuildUp;
+    uint32 RotBuildUp;
+    uint32 BleedBuildUp;
+    uint32 FrostBuildUp;
+    uint32 DeathBuildUp;
+    uint32 SleepBuildUp;
+    uint32 MadnessBuildUp;
+    uint32 unk0x8c ;
+    uint32 CharacterType;
     wchar_t  CharacterName[0x10];
-    byte unk6[0x2];
+    uint16 Terminator;
     byte Gender;
     byte ArcheType;
-    byte unk7[0x3];
+    byte unk0xb8 ;
+    byte unk0xb9 ;
+    byte VoiceType;
     byte Gift;
-    byte unk8[0x54];
+    byte unk0xbc ;
+    byte unk0xbd ;
+    byte AdditionalTalismanSlotsCount;
+    byte SummonSpiritLevel;
+    byte unk0xbf[0x18] ;
+    byte FurlCallingFingerOn;
+    byte unk0xd9 ;
+    byte MatchmakingWeaponLvl;
+    byte WhiteCipherRingOn;
+    byte BlueCipherRingOn;
+    byte unk0xdd[0x1A] ;
+    byte GreatRuneOn;
+    byte unk0xf8 ;
+    byte MaxCrimsonFlaskCount;
+    byte MaxCeruleanFlaskCount;
+    byte unk0xfb[0x15] ; 
     wchar_t Password[0x9];
     wchar_t GroupPassword1[0x9];
     wchar_t GroupPassword2[0x9];
     wchar_t GroupPassword3[0x9];
     wchar_t GroupPassword4[0x9];
     wchar_t GroupPassword5[0x9];
-} PlayerGameData <size=0x1B0>;
+    byte unk0x17c[0x34];
+} PlayerGameData;
 
 // Player Game Data
-// CS::PlayerGameData+0x1B8 (7FF49FC3A6D0+0x1B8)
+// CS::PlayerGameData+0x1B8
 // Length 0xD0
 typedef struct {
-    uint32 speffect_id;
-    uint32 unk;
-    uint32 unk;
-    uint32 unk;
+    uint32 SPEffectID;
+    float RemainingTime;
+    uint32 unk0x8;
+    uint32 unk0x10;
 } SPEffects;
 
 
 // Equip Game Data
-// CS::EquipGameData+0x8 (7FF49FC3A980+0x8)
+// CS::EquipGameData+0x8
 // Length 0x58
 typedef struct {
-    int32 LeftHandArmament1;
-    int32 RightHandArmament1;
-    int32 LeftHandArmament2;
-    int32 RightHandArmament2;
-    int32 LeftHandArmament3;
-    int32 RightHandArmament3;
-    int32 Arrows1;
-    int32 Bolts1;
-    int32 Arrows2;
-    int32 Bolts2;
-    int32 unk1;
-    int32 unk2;
-    int32 Head;
-    int32 Chest;
-    int32 Arms;
-    int32 Legs;
-    int32 unk3;
-    int32 Talisman1;
-    int32 Talisman2;
-    int32 Talisman3;
-    int32 Talisman4;
-} MenuEquippedItems <size=0x58>;
+    uint32 LeftHandArmament1;
+    uint32 RightHandArmament1;
+    uint32 LeftHandArmament2;
+    uint32 RightHandArmament2;
+    uint32 LeftHandArmament3;
+    uint32 RightHandArmament3;
+    uint32 Arrows1;
+    uint32 Bolts1;
+    uint32 Arrows2;
+    uint32 Bolts2;
+    uint32 unk0x28 <hidden = true>;
+    uint32 unk0x2c <hidden = true>;
+    uint32 Head;
+    uint32 Chest;
+    uint32 Arms;
+    uint32 Legs;
+    uint32 unk0x40 <hidden = true>;
+    uint32 Talisman1;
+    uint32 Talisman2;
+    uint32 Talisman3;
+    uint32 Talisman4;
+    uint32 Talisman5 <hidden = true>;
+} ChrAsmEquipment;
 
 
-// Chr Asm
-// CS::ChrAsm+0x8 (7FF49FC3A9F0+0x8)
-// Length 0x74
+// ChrAsm
+// ChrAsm + 0x4
+// Length 0x1C
 typedef struct {
     uint32 ArmStyle;
     uint32 LeftHandWeaponActiveSlot;
@@ -127,130 +196,81 @@ typedef struct {
     uint32 LeftArrowActiveSlot;
     uint32 RightArrowActiveSlot;
     uint32 LeftBoltActiveSlot;
-    uint32 RightBoltActiveSlot;
-    int32 LeftHandArmament1;
-    int32 RightHandArmament1;
-    int32 LeftHandArmament2;
-    int32 RightHandArmament2;
-    int32 LeftHandArmament3;
-    int32 RightHandArmament3;
-    int32 Arrows1;
-    int32 Bolts1;
-    int32 Arrows2;
-    int32 Bolts2;
-    int32 unk1;
-    int32 unk2;
-    int32 Head;
-    int32 Chest;
-    int32 Arms;
-    int32 Legs;
-    int32 unk3;
-    int32 Talisman1;
-    int32 Talisman2;
-    int32 Talisman3;
-    int32 Talisman4;
-} ChrAsm <size=0x74>;
-
-
-// Chr Asm
-// CS::ChrAsm+0x24 (7FF49FC3A9F0+0x24)
-// Length 0x58
-typedef struct {
-    uint32 LeftHandArmament1 <format=hex>;
-    uint32 RightHandArmament1 <format=hex>;
-    uint32 LeftHandArmament2 <format=hex>;
-    uint32 RightHandArmament2 <format=hex>;
-    uint32 LeftHandArmament3 <format=hex>;
-    uint32 RightHandArmament3 <format=hex>;
-    uint32 Arrows1 <format=hex>;
-    uint32 Arrows2 <format=hex>;
-    uint32 Bolts1 <format=hex>;
-    uint32 Bolts2 <format=hex>;
-    uint32 unk <format=hex>;
-    uint32 unk1 <format=hex>;
-    uint32 Head <format=hex>;
-    uint32 Chest <format=hex>;
-    uint32 Arms <format=hex>;
-    uint32 Legs <format=hex>;
-    uint32 unk2 <format=hex>;
-    uint32 Talisman1 <format=hex>;
-    uint32 Talisman2 <format=hex>;
-    uint32 Talisman3 <format=hex>;
-    uint32 Talisman4 <format=hex>;
-    uint32 unk3 <format=hex>;
-} ChrAsm2 <size=0x58>;
+    uint32 RightBoltActiveSlot;   
+} ArmStyleAndActiveWeaponSlots;
 
 
 // Equip Inventory Data
-// Shows up twice from different instances
-// CS::EquipInventoryData+0x8 (7FF49FC3AAD8+0x8,7FF49E380330+0x8)
+// One for held inventory and one for storage box
+// CS::EquipInventoryData+0x8
 // Length 
 typedef struct {
-    uint32 gaitem_handle <format=hex>;
-    uint32 quantity;
-    uint32 inventory_index;
+    uint32 GaitemHandle <format=hex>;
+    uint32 Quantity;
+    uint32 InventoryIndex;
 } EquipInventoryDataEntry;
 
-typedef struct (int size, int size2) {
-    int32 distinct_common_items_count;
-    EquipInventoryDataEntry common_items[size];
-    uint32 distinct_key_items_count;
-    EquipInventoryDataEntry key_items[size2];
-    uint32 latest_equipment_index; // Used for identfyin equipped items.
-    uint32 acquistion_sort_id;
-} EquipInventoryData ;
+typedef struct (int commonItemsCapacity, int keyItemsCapacity) {
+    uint32 CommonItemsCount;
+    EquipInventoryDataEntry CommonItems[commonItemsCapacity] <read=Str("[%X, %d]", this.GaitemHandle, this.Quantity)>;
+    uint32 KeyItemsCount;
+    EquipInventoryDataEntry KeyItems[keyItemsCapacity] <read=Str("[%X, %d]", this.GaitemHandle, this.Quantity)>;;
+    uint32 EquipIndexCounter;
+    uint32 AcquistionIndexCounter;
+} Inventory;
 
 
 // Equip Magic Data
-// CS::EquipMagicData+10 (7FF49E2BE4C0+0x10)
+// EquipMagicData+0x10
 typedef struct {
-    int32 spell_id;
-    int32 offset;
-} EquippedSpell;
+    int32 SpellID;
+    int32 unk0x4;
+} SpellSlot;
 typedef struct {
-    EquippedSpell equipped_spells[0xC]; // Max is 12. Moon Of Nokstella Talisman adds two additional spots 
-    byte unk[0x10];
-    int32 current_slot;
-} EquipMagicData ;
+    // Max is 14. 
+    SpellSlot SpellSlots[0xE] <read=Str("%d", this.SpellID)>;
+    int32 ActiveIndex;
+} EquipMagicData;
 
 
 // Equip Item Data
-// CS::EquipItemData+8 (7FF49FC3ABF0+0x8)
+// CS::EquipItemData+8
 typedef struct {
-    uint32 item_gaitem_handle <format=hex>;
-    int32 equpiment_index;
+    uint32 GaitemHandle <format=hex>;
+    int32 EquipmentIndex;
 } EquippedItem;
 typedef struct {
-    EquippedItem equipped_items[0xA];
-    uint32 current_slot;
-    EquippedItem pouch_items[0x6];
-    byte unk[0x8];
-} EquipItemData ;
+    EquippedItem EquippedItems[0xA];
+    uint32 ActiveSlot;
+    EquippedItem PouchItems[0x6];
+    uint32 unk0x0 <hidden = true>;
+    uint32 unk0x0 <hidden = true>;
+} EquipItemData;
 
 
 // Gesture Equip Data
 // CS::GestureEquipData+8 (7FF4A029D040+0x8)
 // Length 0x70
 typedef struct {
-    uint32 equipped_gesture[0x6];
+    uint32 EquippedGesture[0x6] <format = hex>;
 } GestureEquipData ;
 
 
 // Projectile Equip Data
 // No class name (7FF49F546020)
-// Length max_projectiles*0x8
+// Length ProjectCount*0x8
 typedef struct {
-    int32 projectile_id; // Can be found in the EquipParamWeapon.
-    int32 unk2;
+    int32 ItemID; // Can be found in the EquipParamWeapon.
+    int32 unk0x4 <hidden = true>;
 } Projectile;
 typedef struct {
-    uint32 distinct_projectile_count; // Maybe?
-    Projectile projectiles[distinct_projectile_count]; 
+    uint32 ProjectileCount;
+    Projectile Projectiles[ProjectileCount] <read=Str("%d", this.ItemID)>; 
+
 } EquipProjectileData ;
 
 // Another Equip Data list?
-// No class name (7FF49F546888)
-// Length 0x27
+// Length 0x27*4
 typedef struct {
     int32 LeftHandArmament1 <format=hex>;
     int32 RightHandArmament1 <format=hex>;
@@ -262,18 +282,18 @@ typedef struct {
     int32 Bolts1 <format=hex>;
     int32 Arrows2 <format=hex>;
     int32 Bolts2 <format=hex>;
-    int32 unk1 <format=hex>;
-    int32 unk2 <format=hex>;
+    int32 unk0x28 <format=hex, hidden = true >;
+    int32 unk0x2c <format=hex, hidden = true>;
     int32 Head <format=hex>;
     int32 Chest <format=hex>;
     int32 Arms <format=hex>;
     int32 Legs <format=hex>;
-    int32 unk3 <format=hex>;
+    int32 unk0x40 <format=hex, hidden = true>;
     int32 Talisman1 <format=hex>;
     int32 Talisman2 <format=hex>;
     int32 Talisman3 <format=hex>;
     int32 Talisman4 <format=hex>;
-    int32 unk3 <format=hex>; 
+    int32 unk0x54 <format=hex, hidden = true>; 
     int32 QuickItem1 <format=hex>;
     int32 QuickItem2 <format=hex>;
     int32 QuickItem3 <format=hex>;
@@ -290,482 +310,1067 @@ typedef struct {
     int32 Pouch4 <format=hex>;
     int32 Pouch5 <format=hex>;
     int32 Pouch6 <format=hex>;
-} AnotherEquippedItems <size=(0x27*0x4)>;
+    int32 unk0x98 <format=hex, hidden = true>;
+} EquippedArmamentsAndItems <size=(0x27*0x4)>;
 
 // Equipped Physic
 // No class name (7FF49FC3AD44)
 // Length 0xC
 typedef struct {
-    int32 slot1;
-    int32 slot2;
+    int32 Slot1;
+    int32 Slot2;
+    int32 unk0x8;
 } PhysicEquipData <size=0xC>;
 
 // Face Data
-// CS::FaceData (7FF49FC3AE10)
+// CS::FaceData
 // Length 0x12F
-typedef struct {
-    uint64 unk01;
-    uint64 unk02;
-    uint32 face_model;
-    uint32 hair_model;
-    uint32 eye_model;
-    uint32 eyebrow_model;
-    uint32 beard_model;
-    uint32 accessory_model;
-    uint32 decal_model;
-    uint32 eyelash_model;
-    uchar apparent_age;
-    uchar facial_aesthetic;
-    uchar form_emphasis;
-    uchar numen;
-    uchar brow_ridge_height;
-    uchar inner_brow_height;
-    uchar outer_brow_ridge;
-    uchar cheekbone_height;
-    uchar cheekbone_depth;
-    uchar cheekbone_width;
-    uchar cheekbone_protrusion;
-    uchar cheeks_morph;
-    uchar chin_tip_position;
-    uchar chin_length;
-    uchar chin_protrusion;
-    uchar chin_depth;
-    uchar chin_size;
-    uchar chin_height;
-    uchar chin_width;
-    uchar eye_position;
-    uchar eye_size;
-    uchar eye_slant;
-    uchar eye_spacing;
-    uchar nose_size;
-    uchar nose_to_forehead_ratio;
-    uchar unimplemented_1;
-    uchar face_protrusion;
-    uchar vert_face_ratio;
-    uchar facial_feature_slant;
-    uchar horizontal_face_ratio;
-    uchar unimplemented_2;
-    uchar forehead_depth;
-    uchar forehead_protrusion;
-    uchar unimplemented_3;
-    uchar jaw_protrusion;
-    uchar jaw_width;
-    uchar lower_jaw;
-    uchar jaw_contour;
-    uchar lip_shape;
-    uchar lip_size;
-    uchar lip_fullness;
-    uchar mouth_expression;
-    uchar lip_protrusion;
-    uchar lip_thickness;
-    uchar mouth_protrusion;
-    uchar mouth_slant;
-    uchar mouth_occlusion;
-    uchar mouth_position;
-    uchar mouth_width;
-    uchar mouth_to_chin_distance;
-    uchar nose_ridge_depth;
-    uchar nose_ridge_length;
-    uchar nose_position;
-    uchar nose_tip_height;
-    uchar nostril_slant;
-    uchar nostril_size;
-    uchar nostril_width;
-    uchar nose_protrusion;
-    uchar nose_bridge_height;
-    uchar nose_bridge_protrusion_1;
-    uchar nose_bridge_protrusion_2;
-    uchar nose_bridge_with;
-    uchar nose_height;
-    uchar nose_slant;
-    uchar unimplemented_4[64];
-    uchar body_scale_head;
-    uchar body_scale_breast;
-    uchar body_scale_abdomen;
-    uchar body_scale_arm_right;
-    uchar body_scale_leg_right;
-    uchar body_scale_arm_left;
-    uchar body_scale_leg_left;
-    uchar skin_color_r;
-    uchar skin_color_g;
-    uchar skin_color_b;
-    uchar skin_color_a;
-    uchar skin_pores;
-    uchar beard_stubble;
-    uchar skin_dark_circle;
-    uchar skin_dark_circle_color_r;
-    uchar skin_dark_circle_color_g;
-    uchar skin_dark_circle_color_b;
-    uchar cheeks;
-    uchar cheeks_color_r;
-    uchar cheeks_color_g;
-    uchar cheeks_color_b;
-    uchar eyeliner;
-    uchar eyeliner_color_r;
-    uchar eyeliner_color_g;
-    uchar eyeliner_color_b;
-    uchar eyeshadow_lower;
-    uchar eyeshadow_lower_color_r;
-    uchar eyeshadow_lower_color_g;
-    uchar eyeshadow_lower_color_b;
-    uchar eyeshadow_upper;
-    uchar eyeshadow_upper_color_r;
-    uchar eyeshadow_upper_color_g;
-    uchar eyeshadow_upper_color_b;
-    uchar lipstick;
-    uchar lipstick_color_r;
-    uchar lipstick_color_g;
-    uchar lipstick_color_b;
-    uchar decal_position_x;
-    uchar decal_position_y;
-    uchar decal_angle;
-    uchar decal_scale;
-    uchar decal_color_r;
-    uchar decal_color_g;
-    uchar decal_color_b;
-    uchar unimplemented_5;
-    uchar decal_flip;
-    uchar body_hair;
-    uchar body_hair_color_r;
-    uchar body_hair_color_g;
-    uchar body_hair_color_b;
-    uchar eye_right_color_r;
-    uchar eye_right_color_g;
-    uchar eye_right_color_b;
-    uchar eye_right_iris_size;
-    uchar eye_right_clouding;
-    uchar eye_right_clouding_r;
-    uchar eye_right_clouding_g;
-    uchar eye_right_clouding_b;
-    uchar eye_right_sclera_r;
-    uchar eye_right_sclera_g;
-    uchar eye_right_sclera_b;
-    uchar eye_right_position;
-    uchar eye_left_color_r;
-    uchar eye_left_color_g;
-    uchar eye_left_color_b;
-    uchar eye_left_iris_size;
-    uchar eye_left_clouding;
-    uchar eye_left_clouding_r;
-    uchar eye_left_clouding_g;
-    uchar eye_left_clouding_b;
-    uchar eye_left_sclera_r;
-    uchar eye_left_sclera_g;
-    uchar eye_left_sclera_b;
-    uchar eye_left_position;
-    uchar hair_color_r;
-    uchar hair_color_g;
-    uchar hair_color_b;
-    uchar hair_color_a;
-    uchar hair_color_root_darkness;
-    uchar hair_color_white;
-    uchar beard_color_r;
-    uchar beard_color_g;
-    uchar beard_color_b;
-    uchar beard_color_a;
-    uchar beard_color_root_darkness;
-    uchar beard_color_white;
-    uchar eyebrow_color_r;
-    uchar eyebrow_color_g;
-    uchar eyebrow_color_b;
-    uchar eyebrow_color_a;
-    uchar eyebrow_color_root_darkness;
-    uchar eyebrow_color_white;
-    uchar eyelash_color_r;
-    uchar eyelash_color_g;
-    uchar eyelash_color_b;
-    uchar accessories_color_r;
-    uchar accessories_color_g;
-    uchar accessories_color_b;
-    uchar frenzied_flame;
-    uchar unimplemented_6;
-    uchar unimplemented_7;
-    uchar unimplemented_8;
-    uchar unimplemented_9;
-    uchar unimplemented_10;
-    uchar unimplemented_11;
-    uchar unimplemented_12;
-    uchar end_data[21];
-} FaceData <size=0x12F>;
+typedef struct (byte isInProfileSummary) {
+    int32 FaceData0x150 <hidden = true>; Assert(FaceData0x150 == -1 || FaceData0x150 == 0);
     
+    char Magic[4];
+    Assert(Magic == "FACE" || Magic == "");
+    uint32 Alignment;
+    uint32 Size <format = hex>;
+    
+    ubyte FaceModel;
+    ubyte Padding[3] <hidden = true>;
+    
+    ubyte HairModel;
+    ubyte Padding1[3] <hidden = true>;
+    
+    ubyte unk0x14 < hidden = true>;
+    ubyte Padding2[3] <hidden = true>;
+    
+    ubyte EyeBrowModel;
+    ubyte Padding3[3] <hidden = true>;
+    
+    ubyte BeardModel;
+    ubyte Padding4[3] <hidden = true>;
+    
+    ubyte EyePatchModel;
+    ubyte Padding5[3] <hidden = true>;
+    
+    ubyte unk0x24;
+    ubyte Padding6[3] <hidden = true>;
+    
+    ubyte unk0x28;
+    ubyte Padding7[3] <hidden = true>;
+    
+    ubyte ApparentAge;
+    ubyte FacialAesthetic;
+    ubyte FormEmphasis;
+    ubyte unk0xf;
+    ubyte BrowRidgeHeight;
+    ubyte InnerBrowRidge;
+    ubyte OuterBrowRidge;
+    ubyte CheekboneHeight;
+    ubyte CheekboneDepth;
+    ubyte CheekboneWidth;
+    ubyte CheekboneProstrution;
+    ubyte Cheeks;
+    ubyte ChinTipPosition;
+    ubyte ChinLength;
+    ubyte ChinProstrusion;
+    ubyte ChinDepth;
+    ubyte ChinSize;
+    ubyte ChinHeight;
+    ubyte ChinWidth;
+    ubyte EyePosition;
+    ubyte EyeSize;
+    ubyte EyeSlant;
+    ubyte EyeSpacing;
+    ubyte NoseSize;
+    ubyte NoseForeheadRatio;
+    
+    ubyte unk0x45;
+    
+    ubyte FaceProtrusion;
+    ubyte VerticalFaceRatio;
+    ubyte FacialFeatureSlant;
+    ubyte HorizontalFaceRatio;
+    
+    ubyte unk0x4a;
+    
+    ubyte ForeheadDepth;
+    ubyte ForeheadProtrusion;
+    
+    ubyte unk0x4d;
+    
+    ubyte JawProstrusion;
+    ubyte JawWidth;
+    ubyte LowerJaw;
+    ubyte JawContour;
+    ubyte LipShape;
+    ubyte LipSize;
+    ubyte LipFullness;
+    ubyte MouthExpression;
+    ubyte LipProstrusion;
+    ubyte LipThickness;
+    ubyte MouthProstrusion;
+    ubyte MouthSlant;
+    ubyte Occulsion;
+    ubyte MouthPosition;
+    ubyte MouthWidth;
+    ubyte MouthChinDistance;
+    ubyte NoseRidgeDepth;
+    ubyte NoseRidgeLength;
+    ubyte NosePosition;
+    ubyte NoseTipHeight;
+    ubyte NostrilSlant;
+    ubyte NostrilSize;
+    ubyte NostrilWidth;
+    ubyte NoseProstrution;
+    ubyte NoseBridgeHeight;
+    ubyte BridgeProtrusion1;
+    ubyte BridgeProtrusion2;
+    ubyte NoseBridgeWidth;
+    ubyte NoseHeight;
+    ubyte NoseSlant;
+    
+    ubyte unk0x6c[64];
+    
+    ubyte HeadSize;
+    ubyte ChestSize;
+    ubyte AbdomenSize;
+    ubyte ArmsSize;
+    ubyte LegsSize;
+    
+    ubyte unk0xb1[2];
+    
+    ubyte SkinColorR;
+    ubyte SkinColorG;
+    ubyte SkinColorB;
+    ubyte SkinLuster;
+    ubyte Pores;
+    ubyte Stubble;
+    ubyte DarkCircles;
+    ubyte DarkCircleColorR;
+    ubyte DarkCircleColorG;
+    ubyte DarkCircleColorB;
+    ubyte CheeksColorIntensity;
+    ubyte CheekColorR;
+    ubyte CheekColorG;
+    ubyte CheekColorB;
+    ubyte EyeLiner;
+    ubyte EyeLinerColorR;
+    ubyte EyeLinerColorG;
+    ubyte EyeLinerColorB;
+    ubyte EyeShadowLower;
+    ubyte EyeShadowLowerColorR;
+    ubyte EyeShadowLowerColorG;
+    ubyte EyeShadowLowerColorB;
+    ubyte EyeShadowUpper;
+    ubyte EyeShadowUpperColorR;
+    ubyte EyeShadowUpperColorG;
+    ubyte EyeShadowUpperColorB;
+    ubyte LipStick;
+    ubyte LipStickColorR;
+    ubyte LipStickColorG;
+    ubyte LipStickColorB;
+    ubyte TattoMarkPositionHorizontal;
+    ubyte TattoMarkPositionVertical;
+    ubyte TattoMarkAngle;
+    ubyte TattoMarkExpansion;
+    ubyte TattoMarkColorR;
+    ubyte TattoMarkColorG;
+    ubyte TattoMarkColorB;
+    
+    ubyte unk0xd8;
+    
+    ubyte TattoMarkFlip;
+    ubyte BodyHair;
+    ubyte BodyHairColorR;
+    ubyte BodyHairColorG;
+    ubyte BodyHairColorB;
+    ubyte RighIrisColorR;
+    ubyte RighIrisColorG;
+    ubyte RighIrisColorB;
+    ubyte RightIrisSize;
+    ubyte RightEyeClouding;
+    ubyte RightEyeCloudingColorR;
+    ubyte RightEyeCloudingColorG;
+    ubyte RightEyeCloudingColorB;
+    ubyte RightEyeWhiteColorR;
+    ubyte RightEyeWhiteColorG;
+    ubyte RightEyeWhiteColorB;
+    ubyte RightEyePosition;
+    ubyte LeftIrisColorR;
+    ubyte LeftIrisColorG;
+    ubyte LeftIrisColorB;
+    ubyte LeftIrisSize;
+    ubyte LeftEyeClouding;
+    ubyte LeftEyeCloudingColorR;
+    ubyte LeftEyeCloudingColorG;
+    ubyte LeftEyeCloudingColorB;
+    ubyte LeftEyeWhiteColorR;
+    ubyte LeftEyeWhiteColorG;
+    ubyte LeftEyeWhiteColorB;
+    ubyte LeftEyePosition;
+    ubyte HairColorR;
+    ubyte HairColorG;
+    ubyte HariColorB;
+    ubyte Luster;
+    ubyte HairRootDarkness;
+    ubyte WhiteHairs;
+    ubyte BeardColorR;
+    ubyte BeardColorG;
+    ubyte BeardColorB;
+    ubyte BeardLuster;
+    ubyte HairRootDarkness;
+    ubyte BeardWhiteHairs;
+    ubyte BrowColorR;
+    ubyte BrowColorG;
+    ubyte BrowColorB;
+    ubyte BrowLuster;
+    ubyte BrowRootDarkness;
+    ubyte BrowWhiteHairs;
+    ubyte EyeLeashColorR;
+    ubyte EyeLeashColorG;
+    ubyte EyeLeashColorB;
+    ubyte EyePatchColorR;
+    ubyte EyePatchColorG;
+    ubyte EyePatchColorB;
+    ubyte unk0x10e [0x12];
+    
+    if (isInProfileSummary == 0) {
+        byte face_data_0x128_not_eq_0x0; 
+        int16 face_data_0x128;
+        int64 face_data_0x12a;
+    }
+} FaceData;
 
 // Gesture Game Data
 // CS::GestureGameData (7FF49E380440)
 // Length 0x100
 typedef struct {
-    int32 GestureID[0x40]; // Not sure if it's gesture id
-} GestureGameData <size=0x100>;
+    int32 GestureID[0x40];
+} GestureGameData;
 
 // Regions
 // No class name (7FF49FC3AFE8)
 // Length: Length defined in the struct
 typedef struct {
-    uint32 unlocked_regions_count;
-    uint32 region_ids[unlocked_regions_count];
-} UnlockedRegions;
+    uint32 RegionsCount;
+    if (RegionsCount > 0) {
+        uint32 RegionsIds[RegionsCount];
+    }
+} Regions;
 
 // Ride Game Data
 // CS::RideGameData (7FF4A05AC380)
 // Length 0x28
+local enum HorseState { Active = 13, InActive = 1, Dead = 3};
 typedef struct {
-    float horse_coordinates_xyz[0x3];
-    int32 unk;
-    byte unk1[0x10];
-    int32 horse_hp;
-    int32 unk;
+    FloatVector3 Coordinates;
+    M MapId;
+    FloatVector4 Angle;
+    int32 HP;
+    HorseState State;
 } RideGameData <size=0x28>;
 
+typedef struct {
+    FloatVector3 Coordinates;
+    FloatVector4 Angle;
+    uint32 unk0x1C <hidden = true>;
+    uint32 unk0x20 <hidden = true>;
+    uint32 unk0x24 <hidden = true>;
+    uint32 unk0x28 <hidden = true>;
+    uint32 unk0x2C <hidden = true>;
+    int unk0x30  <hidden = true>;
+    int Souls;
+    M MapID;
+    uint32 unk0x3C <hidden = true>;
+    uint32 unk0x38 <hidden = true>; // Some sort of smaller map identifier.
+} BloodStainData;
+
 // Menu Profile Save Load
-// CS::MenuProfileSaveLoad (7FF4A0086E80)
+// CS::MenuProfileSaveLoad
+// const CS::CSMenuSimpleSaveDataChunk<1,struct CS::MENU_WORLD_MAP_SAVEDATA,2>
 // Length 0x1008
 typedef struct {
-    uint32 unk;
-    uint32 size;
-    byte unk1[size];
+    uint16 unk0x0 <hidden = true>;
+    uint16 unk0x2 <hidden = true>;
+    uint32 Size;
+    byte Data[Size];
 } MenuProfileSaveLoad <size=0x1008>;
 
 
 // Trophy Equip Data
-// CS::TrophyEquipData (7FF4A05AC340)
+// CS::TrophyEquipData
 // Length 0x34
 typedef struct {
-    int32 unk;
-    byte unk1[0x10];
-    byte unk2[0x10];
-    byte unk3[0x10];
-} TrophyEquipData <size=0x34>;
+    int32 unk0x0;
+    byte unk0x4[0x10];
+    byte unk0x14[0x10];
+    byte unk0x24[0x10];
+} TrophyEquipData;
 
 
 // Gaitem Game Data
-// CS::GaitemGameData (7FF4A0089940)
+// CS::GaitemGameData
 // Length ((0x1B58*0x10)+0x8)
 typedef struct  {
-    uint32 id <format=hex>;
-    uint32 unk <format=hex>;
-    uint32 equpiment_index_or_reinforce_type_id;
-    uint32 unk;
-} GaitemGameDataEntry <size=0x10>;
+    uint32 id <read = Str("%d", this & 0x0fffffff)>;
+    byte unk0x4 <hidden = true>;
+    byte padding[3] <hidden = true>;
+    uint32 NextItemId  <read = Str("%d", this & 0x0fffffff)>;
+    byte unk0xc <hidden = true>;
+    byte pading[3] <hidden = true>;
+} GaitemGameDataEntry <read=Str("%d", id & 0x0fffffff)>;
 typedef struct {
-    int32 distinct_aquired_items_count;
-    int32 unk;
+    int64 Count;
     GaitemGameDataEntry item[0x1B58];
-} GaitemGameData <size=((0x1B58*0x10)+0x8)>;
+} GaitemGameData;
 
+
+typedef struct(int TotalSize) {
+    uint32 Count;
+    uint32 ID[TotalSize];
+} CSTutorialDataChunk;
 // Tutorial Data
-// CS::CSTutorialData (7FF4A029D070)
+// CS::CSTutorialData
+// const CS::CSMenuSimpleSaveDataChunk<1,struct CS::MENU_WORLD_MAP_SAVEDATA,2>
 // Length 0x408
 typedef struct {
-    uint32 unk;
-    uint32 size;
-    byte unk1[size];
-} TutorialData;
+    uint16 unk0x0 <hidden = true>;
+    uint16 unk0x2 <hidden = true>;
+    uint32 Size;
+    CSTutorialDataChunk Data(Size);
+} CSTutorialData <size = (1024 + 8)>;
 
 
 // EventFlag
 // CS::CSFDVirtualMemoryFlag (7FF4A0300000)
 // Length 0x1BF99F
 typedef struct {
-    byte a: 1;
-    byte b: 1;
-    byte c: 1;
-    byte d: 1;
-    byte e: 1;
-    byte f: 1;
-    byte g: 1;
-    byte h: 1;
-} EventFlagsBit;
-typedef struct {
-    EventFlagsBit event_flag[0x1BF99F]; // Array length is calculated from (CSEventFlagMan+0x20*CSEventFlagMan+0x24)
-} EventFlags <size=(0x1BF99F)>;
+    byte Bit0: 1;
+    byte Bit1: 1;
+    byte Bit2: 1;
+    byte Bit3: 1;
+    byte Bit4: 1;
+    byte Bit5: 1;
+    byte Bit6: 1;
+    byte Bit7: 1;
+} EventFlag;
 
-// UknownStructWithDefinedLength
-// no class name (WorldChrManImp)
-// Length: 
+
 typedef struct {
-    int32 length;
-    byte data[length];
-} UknownStructWithDefinedLength;
+    int32 Size;
+    if (Size > 0) {
+        uint32 Data[Size/4];
+    }
+} CSFieldArea;
+
+typedef struct (int &pSize) {
+    char magic[4];
+    M MapId;
+    uint32 Size;
+    uint32 unk0xC <format = hex>;
+    
+    local int Size2 = Size - 0x10;
+    if (Size2 > 0 ) {
+        byte unk0x8 [Size2];
+        pSize = pSize - Size;
+    }
+    else {
+        pSize = pSize - 0x10;
+    }
+} CSWorldBlockChrData <optimize = false>;
+// TODO: Check if it changes during online session.
+typedef struct (int32 Size) {
+    char Magic[4];
+    
+    // Appears to be hardcoded to `0x21042700`. 
+    uint32 unk_0x21042700 <hidden = true>;
+    Assert(unk_0x21042700 == 0x21042700 || unk_0x21042700 == 0);
+    
+    uint32 unk0x8 <hidden = true>;
+    Assert(unk0x8 == 0);
+    
+    uint32 unk0xc <hidden = true>;
+    Assert(unk0xc == 0);
+    
+    if (Size != 0) {
+        Size = Size - 0x10;
+        while (Size != 0) {
+            CSWorldBlockChrData WorldBlockChrData(Size);
+        }
+    }
+} CSWorldAreaChrData;
+typedef struct {
+    int32 Size;
+    if ( Size > 0 ) {
+        CSWorldAreaChrData WorldAreaChrData (Size);
+    }
+} CSWorldArea;
+
+// TODO: Clean up
+typedef struct (int &S) {
+    M MapID;
+    uint32 Size;
+    if ((Size - 8) > 0) {
+        byte Data[Size-8];
+    }
+    S = S - Size;
+} EntryData <optimize = false>;
+
+typedef struct (int &Size) {
+    char magic[4];
+    uint32 unk0x4 <format = hex>;
+    Size = Size - 20;
+    while (Size > 0) {
+        EntryData Entry(Size);
+    }
+    uint64 unk0xxx <hidden = true>;
+    uint64 unk0xxx <hidden = true>;
+} CSSomething;
+typedef struct {
+    int32 Size;
+    local int S = Size - 4;
+    if (S > 0) {
+        CSSomething Data (S);
+    }
+} CSWorldGeomMan;
+
+
+typedef struct (int Size) {
+    byte Data[Size];
+} CSStageManEntry <optimize = false>;
+typedef struct (int &Size) {
+    int Count;
+    CSStageManEntry Entry((Size-4)/Count)[Count];
+} CSStageMan;
+typedef struct {
+    int32 Size;
+    if (Size > 0) {
+        CSStageMan Data(Size);
+    }
+} CSRendMan;
+
 
 // PlayerCoords
-// CS::GameMan+0xbd0 (7FF49FC37520+0xbd0)
 // Length 0x3D
 typedef struct {
-    float global_coords[0x3];
-    uint32 map_id; // (index_id, region_id, block_id, area_id)
-    byte game_man_0xBE0[0x10] <format=hex>;
-    byte game_man_0xBF0;
-    float unk_coords_game_man_0xB04[0x3];
-    byte game_man_0xB10[0x10];
-} PlayerCoords<size=0x3D>;
+    FloatVector3 Coordinates;
+    M MapID;
+    FloatVector4 Angle;
+    byte game_man_0xBF0 <hidden = true>;
+    Assert(game_man_0xBF0 == 0 || game_man_0xBF0 == 1);
+    FloatVector3 UnkCoordinates;
+    FloatVector4 UnkAngle;
+} CSPlayerCoords;
 
 // CSNetMan
 // CS::CSNetMan ()
 // Length 0x20004
 typedef struct {
-    uint32 csnet_man_unk_always_2;
-    byte something_to_do_with_csnet_data_chunk[0x20000];
+    uint32 unk0x0 <hidden = true>;
+    Assert(unk0x0 == 2);
+    byte CSNetManData[0x20000];
 } CSNetMan<size=0x20004>;
 
+local enum <uint16> WeatherTypeEnum {
+    None2 = -1,
+    Default = 0,
+    Rain = 20,
+    Snow = 40,
+    WindyRain = 30,
+    Fog = 50,
+    Cloudless = 1,
+    FlatClouds = 10,
+    PuffyClouds = 11,
+    RainyCloud = 21,
+    WindyFog = 31,
+    HeavySnow = 41,
+    HeavyFog = 51,
+    WindyPuffyClouds = 60,
+    RainyHeavyFog = 52,
+    SnowyHeavyFog = 81,
+    ScatteredRain = 82,
+    Unknown18 = 83,
+    Unknown19 = 84,
+    Unknown20 = 85,
+    Unknown21 = 86,
+    Unknown22 = 87,
+    Unknown23 = 88,
+};
 // WorldAreaWeather
 // CS::WorldAreaWeather 
 // Length 0xC
 typedef struct {
-    uint32 unk;
-    uint32 unk;
-    uint32 unk;
-} WorldAreaWeather<size=0xC>;
+    uint16 AreaId;
+    WeatherTypeEnum WeatherType;
+    // Maybe a timer?
+    uint32 Timer;
+    uint32 padding <hidden = true>;
+} CSWorldAreaWeather<size=0xC>;
 
 // WorldAreaTime
 // CS::WorldAreaTime
 // Length 0xC
 typedef struct {
-    uint32 unk;
-    uint32 unk;
-    uint32 unk;
-} WorldAreaTime<size=0xC>;
+    uint32 Hour;
+    uint32 Minute;
+    uint32 Seconds;
+} CSWorldAreaTime <read=Str("%02d:%02d:%02d", Hour, Minute, Seconds)>;
+
+typedef struct {
+    int BaseVersionCopy;
+    int BaseVersion;
+    Boolean BaseVersionIsLatest;
+    Assert( BaseVersionIsLatest == True || BaseVersionIsLatest == False);
+    int unk0xc <hidden = true>;
+} BaseVersion;
+
+typedef struct {
+    uint64 unk0x0;
+    uint64 unk0x8;
+    uint64 unk0x10;
+    uint64 unk0x18;
+    uint64 unk0x20;
+    uint32 unk0x28;
+    uint32 unk0x2c;
+    uint32 unk0x30;
+    uint64 unk0x34;
+    uint32 unk0x3c;
+} CSPS5Activity <size = 0x20>;
+
+typedef struct {
+    uint64 unk0x0;
+    uint64 unk0x8;
+    uint64 unk0x10;
+    uint64 unk0x18;
+    uint64 unk0x20;
+    uint64 unk0x28;
+    uint16 unk0x30;
+} CSDlc;
+
+typedef struct (
+    PlayerGameData &player, 
+    ChrAsmEquipment &equipment,
+    EquippedArmamentsAndItems &equippedArmamentsAndItems,
+    EquipMagicData &equippedSpells
+    ) {
+    // Level
+    uint32 Level <format = hex>;
+    Assert(Level == 0 || Level == ValueHash(player.Level));
+    
+    // Stats
+    uint Stats <format = hex>;
+    Assert(Stats == 0 || Stats == StatsHash(player));
+    
+    // ArcheType
+    uint ArcheType <format = hex>;
+    Assert(ArcheType == 0 || ArcheType == ValueHash(player.ArcheType));
+    
+    // PlayerGameData0xC0
+    uint PlayerGameData0xC0 <format = hex>;
+    local byte buffer[4];
+    ConvertDataToBytes(player.unk0xb8, buffer);
+    Assert(PlayerGameData0xC0 == 0 || PlayerGameData0xC0 == BytesHash(buffer, 1));
+    
+    uint32 padding <hidden = true>;
+    
+    // Souls
+    uint Souls <format = hex>;
+    Assert(Souls == 0 || Souls == ValueHash(player.Souls));
+    
+    // SoulsMemory
+    uint Soulmemory <format = hex>;
+    Assert(Soulmemory == 0 || Soulmemory == ValueHash(player.Soulmemory));
+    
+    // Equipped Weapons
+    uint EquippedWeapons <format = hex>;
+    Assert(EquippedWeapons == 0 || EquippedWeapons == EquippedWeaponsHash(equipment));
+    
+    // Equipped Weapons
+    uint EquippedArmorsAndTalismans <format = hex>;
+    Assert(EquippedArmorsAndTalismans == 0 || EquippedArmorsAndTalismans == EquippedArmorsAndTalismansHash(equipment));
+
+    // Equipped Items
+    uint EquippedItems <format = hex>;
+    Assert(EquippedItems == 0 || EquippedItems == EquippedItemsHash(equippedArmamentsAndItems));
+
+    // Equipped Spells
+    uint EquippedSpells <format = hex>;
+    Assert(EquippedSpells == 0 || EquippedSpells == EquippedSpellsHash(equippedSpells));
+} CSPlayerGameDataHash <size = 0x80>;
+
+typedef struct {
+    byte CameraSpeed;
+    byte ControllerVibration;
+    byte Brightness;
+    byte Unk0x3;
+    byte MusicVolume;
+    byte SoundEffectsVolume;
+    byte VoiceVolume;
+    byte DisplayBlood;
+    byte Subtitles;
+    byte HUD;
+    byte CameraXAxis;
+    byte CameraYAxis;
+    byte ToggleAutoLockOn;
+    byte CameraAutoWallRecovery;
+    byte Unk0xE;
+    byte Unk0xF;
+    byte ResetCameraYAxis;
+    byte CinematicEffects;
+    byte Unk0x12;
+    byte PerformMatchmaking;
+    byte Unk0x14;
+    byte Unk0x15;
+    byte ManualAttackAim;
+    byte AutoTarget;
+    byte LaunchSettings;
+    byte SendSummonSign;
+    byte Unk0x1A;
+    byte HDR;
+    byte HDRAdjustBrightness;
+    byte HDRMaximumBrightness;
+    byte HDRAdjustSaturation;
+    byte Unk0x1F;
+    byte MasterVolume;
+    byte IsRayTracingOn;
+    byte MarkNewItems;
+    byte ShowRecentTabs;
+    uint64 Unk0x24 <hidden = true>; Assert(Unk0x24 == 0);
+    uint16 Unk0x2C <hidden = true>; Assert(Unk0x2C == 0);
+    byte ShowTutorials;
+    byte CameraAutoRotation;
+    byte JustZero[0x110] <hidden = true>;
+} CSSettings;
 
 // CSMenuSystemSaveLoad
-// CS::CSMenuSystemSaveLoad (7FF4A00859D0)
-// Length 0x3D
 typedef struct {
-    uint32 unk;
-    uint32 size;
-    byte data[size]; 
-} CSMenuSystemSaveLoad;
+    uint16 Unk0x0 <hidden = true>;
+    uint16 Unk0x2 <hidden = true>;
+    uint32 Size;
+    ubyte Data[Size];
+} CSMenuSystemSaveLoad ;
 
-// CSProfileSummary
-// CS::CSProfileSummary (7FF4A0087EE0)
-// Length ??
+typedef byte SlotState[10] <read=Str(
+    "%d,%d,%d,%d,%d,%d,%d,%d,%d,%d", 
+    this[0],this[1],this[2],this[3],
+    this[4],this[5],this[6],this[7],
+    this[8],this[9]
+)>;
+
 typedef struct {
-    wchar_t chracter_name[0x11];
-    int32 level;
-    int32 _0x28;
-    int32 _0x2C;
-    int32 _0x30;
-    int32 _0x34;
-    int32 _0x38_0x150;
-    byte _0x38_0x8[0x120];
-    byte _0x1A8[0xE8];
-    byte _0x290;
-    byte _0x291;
-    byte _0x292;
-    byte _0x293;
-    byte _0x294;
-    byte _0x295;
-    int32 _0x298;
+    // Most likely vtable pointer
+    uint32 unk0x0 <hidden = true>;
+    uint32 unk0x4 <hidden = true>;
+    
+    ArmStyleAndActiveWeaponSlots ActiveEquippedWeaponsSlots;
+    DisplayFormatHex();
+    ChrAsmEquipment EquippedItemsGaitemHandles;
+    DisplayFormatDecimal();
+    ChrAsmEquipment EquippedItemsItemIds;
+    int32 Unk0xD4 <hidden = true>; 
+    uint32 Unk0xD8 <hidden = true>;
+    uint32 Unk0xDC[3] <hidden = true>;
+    
+} ProfileSummaryChrAsm;
+
+typedef struct {
+    wchar_t CharacterName[0x11];
+    int32 Level;
+    int32 SecondsPlayed;
+    int32 RuneMemory;
+    M MapId;
+    uint32 Unk0x34;
+    FaceData Facedata(1);
+    ProfileSummaryChrAsm Equipment <format=hex>;
+    byte Gender;
+    byte ArcheType;
+    byte StartingGift;
+    byte ProfileSummaryCharacter0x293;
+    byte ProfileSummaryCharacter0x294;
+    byte ProfileSummaryCharacter0x295;
+    int32 ProfileSummaryCharacter0x298;
+} ProfileData <size = 0x24C, optimize = false> ;
+// CSProfileSummary
+typedef struct {
+    SlotState IsProfileActive;
+    ProfileData Profile[0xA];
 } CSProfileSummary;
 
 // PCOptionsData
 // CS::PCOptionsData (7FF49E1830C0)
 // Length ??
 typedef struct {
-    uint16 _0x8[0x9];
-    byte _0x1a[0xa0];
-} PCOptionsData;
+    uint32 Unk0x0;
+    ubyte Unk0xC;
+    ubyte Unk0xD;
+    ubyte Unk0xE;
+    ubyte Unk0xF;
+    uint64 Unk0x10;
+    uint16 Unk0x18;
+    uint16 Unk0x12[0xa0/2];
+} CSPCOptionData;
 
 // CSKeyConfigSaveLoad
 // CS::CSKeyConfigSaveLoad (7FF49E1830C0)
 // Length ??
 typedef struct {
-    uint32 unk;
-    uint32 size;
-    byte data[size];
+    uint16 unk0x0 <hidden = true>;
+    uint16 unk0x2 <hidden = true>;
+    uint32 Size;
+    byte Data[Size];
 } CSKeyConfigSaveLoad;
 
-struct FileHeader {
+struct BND4FileHeader {
     char magic[0x4];
     byte unk[0x5];
     byte big_endian;
     byte unk;
     byte unk;
     uint file_count;
-} file_header <size=0x300>;
+} Header <size=0x300>;
 
 // Character Slot
 struct Slot {
-    byte checksum[0x10];
-    uint32 unk01;
-    uint32 MapID <format=hex>;
-    byte unk[0x18];
-    Item gaitem_handle_to_item_id_map[0x1400] <optimize=false>;
-    PlayerGameData player_game_data <bgcolor=0xf1c40f>;
-    SPEffects speffects[0xd] <bgcolor=0xd35400>;
-    MenuEquippedItems menu_equipped_items <bgcolor=0x000020>;
-    ChrAsm chr_asm <bgcolor=0xc0392b>;
-    ChrAsm2 chr_asm_2 <bgcolor=0xecf0f1>;
-    EquipInventoryData inventory_held(0xA80, 0x180);
-    EquipMagicData equip_magic_data;
-    EquipItemData equip_item_data;
-    GestureEquipData gesture_equip_data;
-    EquipProjectileData equip_projectile_data;
-    AnotherEquippedItems another_equipped_items_list;
-    PhysicEquipData physic_equip_data;
-    FaceData face_data;
-    EquipInventoryData inventory_storage_box(0x780, 0x80);
-    GestureGameData gesture_game_data;
-    UnlockedRegions unlocked_regions;
-    RideGameData ride_game_data;
-    byte unk;
-    byte unk1[0x40] <format=hex>;
-    uint32 unk2 <format=hex>;
-    uint32 unk3;
-    uint32 unk4;
-    MenuProfileSaveLoad menu_profile_save_load;
-    TrophyEquipData trophy_equip_data;
-    GaitemGameData ga_item_game_data;
-    TutorialData tutorial_data;
-    byte unk5;
-    byte unk6;
-    byte unk7;
-    uint32 unk8;
-    uint32 unk9;
-    byte unk10;
-    uint32 unk11;
-    uint32 unk12;
-    byte unk13;
-    uint32 unk14;
-    uint32 unk15;
-    EventFlags event_flags;
-    byte unk;
-    UknownStructWithDefinedLength uknown_struct_something_to_do_with_field_area; 
-    UknownStructWithDefinedLength unkown_struct_something_to_do_with_world_chr_man;
-    UknownStructWithDefinedLength unkown_struct_something_to_do_with_world_geom;
-    UknownStructWithDefinedLength unkown_struct_something_to_do_with_world_geom2;
-    UknownStructWithDefinedLength unkown_struct_something_to_do_with_field_area2;
-    PlayerCoords player_coords;
-    byte game_man_0xb2d;
-    byte game_man_0xb2e;
-    uint32 game_man_0xb30;
-    uint32 game_man_0xb34;
-    uint32 game_man_0xb38;
-    byte game_man_0xc83;
-    CSNetMan csnet_man;
-    WorldAreaWeather world_area_weather;
-    WorldAreaTime world_area_time;
-    byte unk_143cd4d88_0xE0[0x10];
-    uint64 steam_id;
-    byte cs_ps5_activity[0x20];
-    byte cs_dlc[0x32];
-    byte unk_bytes_added_at_0x140670d7b[0x80];
-} save_slots[10] <optimize=false, size=0x280010>;
+    // Checksum
+    byte checksum[0x10] <hidden = true>;
+    
+    // Patch version?
+    uint32 Version;
+    
+    // MapID
+    M MapID;
+    
+    // Random bytes? Game called random generator on this I think :thinkus:
+    byte unk0x8[0x18]<hidden=true>;
+    
+    // GaitemMap count. It's two entries shorter on older patches.
+    local int count = 0x1400;
+    if ( Version <= 80 ) {
+        count = 0x13FE; 
+    }
+    
+    // Gaitem Map
+    Item GaitemHandleMap[count] <optimize=false, read=Str("%X -> %X", this.GaitemHandle, this.ItemID)>;
+    
+    // Player Data
+    PlayerGameData Player;
+    SPEffects SpEffects[0xd] <read=Str("%d", this.SPEffectID)>;
+    
+    // Equipment and Inventory Data
+    ChrAsmEquipment EquippedItemsEquipIndex;
+    ArmStyleAndActiveWeaponSlots ActiveEquippedWeaponSlots;
+    ChrAsmEquipment EquippedItemsItemIds;
+    DisplayFormatHex();
+    ChrAsmEquipment EquippedItemsGaitemHandles;
+    DisplayFormatDecimal();
+    Inventory InventoryHeld(0xA80, 0x180);
+    EquipMagicData EquippedSpells;
+    EquipItemData EquippedItems;
+    GestureEquipData EquippedGestures;
+    EquipProjectileData AcquiredProjectiles;
+    EquippedArmamentsAndItems EquippedArmamentsandItems;
+    PhysicEquipData EquippedPhysics;
+    
+    // Face Data
+    FaceData Facedata(0);
+    
+    // Inventory Data (Storage Box)
+    Inventory InventoryStorageBox(0x780, 0x80);
+    
+    // Gestures
+    GestureGameData Gestures;
+    
+    // Regions
+    Regions UnlockedRegions;
+    
+    // Horse
+    RideGameData Horse;
+    
+    // Control Byte
+    byte one <hidden=true>;
+    Assert(one == 1 || one == 0);
+    
+    // Bloodstain
+    BloodStainData BloodStain;
+    
+    uint32 unk_gameDataMan_0x120_or_gameDataMan_0x130 <hidden = true>;
+    uint32 unk_gameDataMan_0x88 <hidden = true>;
+    
+    // MenuProfileSaveLoad
+    MenuProfileSaveLoad UnkMenuProfileSaveLoad;
+    
+    // TrophyEquipData
+    TrophyEquipData UnkTrophyEquipData <hidden = true>;
+    
+    // GaitemGameData
+    GaitemGameData GaitemData;
+    
+    // TutorialData
+    CSTutorialData TutorialData;
+    
+    // Some kind of indicator, stops the game from saving if set to 1
+    byte GlobalGameMan_0x8c <hidden = true>;
+    
+    // TODO: Figure these
+    byte GlobalGameMan_0x8d <hidden = true>;
+    byte GlobalGameMan_0x8e <hidden = true>;
+    
+    // Total times player dies since character was first created
+    uint32 TotalDeathsCount;
+    
+    // Character Type
+    local enum CT { None = -1, Phantom = 1,  Invader = 2, Ghost = 3, DeadGhost = 10, NakedGhost = 11, Unkown = 13, NakedGhost2 = 14, Invader2 = 15, Invader3 = 16, Blue = 17, Invader4 = 18 };
+    CT ChracterType;
+    
+    // Setting to 1 means can't warp, rest in sites of graces, etc...
+    byte InOnlineSessionFlag;
+    
+    // For phantom or invader character types this value is 0. Otherwise it's 8.
+    uint32 OnlineCharacterTypeFlag;
+    Assert(OnlineCharacterTypeFlag == 0 || OnlineCharacterTypeFlag == 8);
+    
+    // Last Grace Rested (-1000)
+    uint32 LastRestedGrace;
+    
+    // Not Alone Flag
+    byte NotAloneFlag;
+    
+    // 1 = 10 seconds. 
+    uint32 InGameTimer;
+    
+    uint32 unk_gameDataMan_0x124_or_gameDataMan_0x134 <hidden = true>;
+    
+    // EventFlags
+    EventFlag EventFlags[0x1BF99F] <name = Str("Offset"), read=Str("%d,%d,%d,%d,%d,%d,%d,%d", Bit0, Bit1, Bit2, Bit3, Bit4, Bit5, Bit6, Bit7)>; 
+    byte EventFlagTerminator <hidden = true>;
+    Assert(EventFlagTerminator == 0);
+    
+    // Sized Data?
+    CSFieldArea FieldArea; 
+    CSWorldArea WorldArea;
+    CSWorldGeomMan WorldGeom;
+    CSWorldGeomMan WorldGeom2;
+    CSRendMan RendMan;
+    
+    // Player Coordinates
+    CSPlayerCoords PlayerCoordinates;
+    
+    // So far testing shows that setting this to 1 makes you spawn in with animation, 0 means not
+    byte GameMan_0xB5E <hidden = true>;
+    
+    // So far testing shows this gets set to 1 when you map warp, but is set to 0 after you rest at grace
+    byte GameMan_0xB5F <hidden = true>;
+    
+    // SpawnPointEntityId
+    uint32 SpawnPointEntityId;
+    
+    // It's with a heavy heart that I have make an ass out of you and me and assert this as zero without being sure.
+    uint32 GameMan0xb64 <hidden = true>;
+    Assert(GameMan0xb64 == 0);
+    
+    // Only saved on versions post patch 65. Temporarily holds SpawnEntityId - 970.
+    if (Version > 65) {
+        uint32 TempSpawnPointEntityId;
+    }
+    
+     // Only saved on versions post patch 66. Temporarily `1` during loading screen.
+    if (Version > 66) {
+        byte GameMan0xCB3 <hidden = true>;
+    }
+    
+    // Todo: Detail this
+    CSNetMan NetMan;
+    
+    // World Area Weather
+    CSWorldAreaWeather WorldAreaWeather;
+    CSWorldAreaTime WorldAreaTime;
+    
+    // Version from when the character was created.
+    BaseVersion BaseCharacterVersion;
+    uint64 SteamId;
+    
+    // PS5Activity
+    CSPS5Activity PS5Activity;
+    
+    // DLC
+    CSDlc DLC;
+    
+    // Hash values calculated from the PlayerGameData
+    CSPlayerGameDataHash PlayerGameDataHash (
+        Player, 
+        EquippedItemsItemIds, 
+        EquippedArmamentsandItems,
+        EquippedSpells
+    );
+} Character[10] <optimize=false, size=0x280010, read=Str("%03d | %s", this.Player.Level, this.Player.CharacterName)>;
 
 struct USER_DATA10{
-    byte checksum[0x10];
-    uint32 unk;
-    uint64 steam_id;
-    byte unk2[0x140];
-    CSMenuSystemSaveLoad cs_menu_system_save_load;
-    byte active_slot[0xA];
-    CSProfileSummary profile_summary[0xA];
-    uint32 _0xd0;
-    byte unk;
-    PCOptionsData pc_option_data;
-    CSKeyConfigSaveLoad cs_key_config_save_load;
-    uint64 _0x118;
-} user_data_10 <size=0x60010>;
+    byte Checksum[0x10] <hidden = true>;
+    uint32 Version;
+    uint64 SteamId;
+    CSSettings Settings;
+    CSMenuSystemSaveLoad MenuSystemSaveLoad;
+    CSProfileSummary ProfileSummary;
+    uint32 GameDataMan0xd0;
+    byte GameDataMan0x75;
+    CSPCOptionData PCOptionData;
+    CSKeyConfigSaveLoad KeyConfigSaveLoad;
+    uint64 GameDataMan0x118;
+} Common <size=0x60010>;
 
 struct USER_DATA11{
-    byte checksum[0x10];
-    byte unk[0x10];
-    byte regulation[0x1C5F70];
-} user_data_11<size=0x24001F>;
+    byte checksum[0x10] <hidden = true>;
+    byte unk[0x10] <hidden = true>;
+    byte Regulation[0x1e9fb0];
+} Regulation<size=0x24001F>;
+
+
+// =========================================
+// PlayerGameData Hash Helper Functions
+// =========================================
+
+// Calculate Hash for a 4 byte value
+uint ValueHash(uint value) {
+    local byte buffer[0x4];
+    ConvertDataToBytes(value, buffer);
+    return BytesHash(buffer, 0x4);
+}
+
+// Calculate Hash for a sized byte stream value
+uint BytesHash(byte bytes[], int size) {
+    local int i = 0; // Start
+    local int n = size; // End
+    
+    local uint lo = 1;
+    local uint hi = 0;
+    
+    while (i < n) {
+        lo = lo + (bytes[i] & 0xFF);
+        hi = hi + lo;
+        i = i + 1;
+    }
+    
+    local uint lo_hashed = ComputeHashedValue(lo);
+    local uint hi_hashed = ComputeHashedValue(hi);
+    
+    return (lo_hashed | (hi_hashed << 0x10)) * 2;    
+}
+
+// Compute the Hash
+uint ComputeHashedValue(uint input) {
+    local uint64 product = (uint64)0x80078071 * (uint64)input;
+    local uint32 upper_bits = (uint32)(product >> 32);
+    local uint32 shifted_upper_bits = upper_bits >> 15;
+    local uint32 mod_product = (uint32)((int32)shifted_upper_bits * (-0xfff1));
+    return input + mod_product;
+}
+
+// Calculate Stats Hash
+uint StatsHash(PlayerGameData &player) {
+    local int size = 0x24;
+    
+    local uint stats[9];
+    stats[0] = player.Vigor;
+    stats[1] = player.Mind;
+    stats[2] = player.Endurance;
+    stats[3] = player.Strength;
+    stats[4] = player.Dexterity;
+    stats[6] = player.Faith;
+    stats[5] = player.Intelligence;
+    stats[7] = player.Arcane;
+    stats[8] = player.Humanity;
+    
+    local byte buffer[size];
+    ConvertDataToBytes(stats, buffer);
+    return BytesHash(buffer, size);
+}
+
+// Calculate Equipped Weapons Hash
+uint EquippedWeaponsHash(ChrAsmEquipment& equipment) {
+    local int size = 0x28;
+    
+    local uint ids[10];
+    ids[0] = equipment.LeftHandArmament1;
+    ids[1] = equipment.LeftHandArmament2;
+    ids[2] = equipment.LeftHandArmament3;
+    ids[3] = equipment.RightHandArmament1;
+    ids[4] = equipment.RightHandArmament2;
+    ids[5] = equipment.RightHandArmament3;
+    ids[6] = equipment.Arrows1;
+    ids[7] = equipment.Arrows2;
+    ids[8] = equipment.Bolts1;
+    ids[9] = equipment.Bolts2;
+    
+    local byte buffer[size];
+    ConvertDataToBytes(ids, buffer);
+    return BytesHash(buffer, size);
+}
+
+// Calculate Equipped Armor and Talismans Hash
+uint EquippedArmorsAndTalismansHash(ChrAsmEquipment& equipment) {
+    local int size = 0x24;
+    local uint ids[9];
+    ids[0] = equipment.Head;
+    ids[1] = equipment.Chest;
+    ids[2] = equipment.Arms;
+    ids[3] = equipment.Legs;
+    ids[4] = equipment.Talisman1;
+    ids[5] = equipment.Talisman2;
+    ids[6] = equipment.Talisman3;
+    ids[7] = equipment.Talisman4;
+    ids[8] = equipment.Talisman5;
+    
+    local byte buffer[size];
+    ConvertDataToBytes(ids, buffer);
+    return BytesHash(buffer, size);
+}
+
+// Calculate Equipped QuickItems and PouchItems Hash
+uint EquippedItemsHash(EquippedArmamentsAndItems& equippedArmamentsAndItems) {
+    local int size = 0x40;
+    local uint ids[16];
+    ids[0] = equippedArmamentsAndItems.QuickItem1; 
+    ids[1] = equippedArmamentsAndItems.QuickItem2; 
+    ids[2] = equippedArmamentsAndItems.QuickItem3; 
+    ids[3] = equippedArmamentsAndItems.QuickItem4; 
+    ids[4] = equippedArmamentsAndItems.QuickItem5; 
+    ids[5] = equippedArmamentsAndItems.QuickItem6; 
+    ids[6] = equippedArmamentsAndItems.QuickItem7; 
+    ids[7] = equippedArmamentsAndItems.QuickItem8; 
+    ids[8] = equippedArmamentsAndItems.QuickItem9; 
+    ids[9] = equippedArmamentsAndItems.QuickItem10; 
+    ids[10] = equippedArmamentsAndItems.Pouch1; 
+    ids[11] = equippedArmamentsAndItems.Pouch2; 
+    ids[12] = equippedArmamentsAndItems.Pouch3; 
+    ids[13] = equippedArmamentsAndItems.Pouch4; 
+    ids[14] = equippedArmamentsAndItems.Pouch5; 
+    ids[15] = equippedArmamentsAndItems.Pouch6;
+    
+    local int i = 0;
+    while ( i < 16 ) {
+        if (ids[i] != 0xFFFFFFFF) {
+            ids[i] = ids[i] & 0x0fffffff;    
+        }
+        i = i +1;    
+    }
+    
+    local byte buffer[size];
+    ConvertDataToBytes(ids, buffer);
+    return BytesHash(buffer, size);
+}
+
+// Calculate Equipped Spells Hash
+uint EquippedSpellsHash(EquipMagicData& equippedSpells) {
+    local int size = 0x38;
+    local uint ids[14];
+    
+    local int i = 0;
+    while ( i < 14 ) {
+        ids[i] = equippedSpells.SpellSlots[i].SpellID;    
+        i = i +1;    
+    }
+    
+    local byte buffer[size];
+    ConvertDataToBytes(ids, buffer);
+    return BytesHash(buffer, size);
+}
+
