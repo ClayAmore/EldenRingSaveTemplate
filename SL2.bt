@@ -16,6 +16,8 @@ local enum Boolean {
     True = 1
 };
 
+local enum<byte> AT { Unknown = -1, Vagabond = 0, Warrior = 1, Hero = 2, Bandit = 3, Astrologer = 4, Prophet = 5, Confessor = 6, Samurai = 7, Prisoner = 8, Wretch = 9 };
+
 // Coordinates
 typedef struct {
     float X;
@@ -116,7 +118,7 @@ typedef struct {
     wchar_t  CharacterName[0x10];
     uint16 Terminator;
     byte Gender;
-    byte ArcheType;
+    AT ArcheType;
     byte unk0xb8 ;
     byte unk0xb9 ;
     byte VoiceType;
@@ -982,7 +984,7 @@ typedef struct {
     FaceData Facedata(1);
     ProfileSummaryChrAsm Equipment <format=hex>;
     byte Gender;
-    byte ArcheType;
+    AT ArcheType;
     byte StartingGift;
     byte ProfileSummaryCharacter0x293;
     byte ProfileSummaryCharacter0x294;
