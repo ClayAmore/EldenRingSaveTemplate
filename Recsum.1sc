@@ -17,29 +17,41 @@ uchar buffer[0x280000];
 uchar result[0x10];
 string og_name = GetFileName();
 
+int HEADER_SIZE = 0x300;
+int CHARACTER_FILE_SIZE = 0x280000;
+int CHECKSUM_SIZE = 0x10;
+int USERDATA_10_SIZE = 0x60000;
+int MAX_CHARACTER_COUNT = 10;
+
 // Count active slots
 while(i < 10) {
     if((ReadByte(active_slots_offset + 0x1*i)) == 1) slots_count++;
     i++;
 }
 
-// Recalculate checksum for character slots
+// Recalculate checksum for active character slots
 i = 0;
 while(i < slots_count) {
-    offset = 0x300 + (0x280010 * i);
+    // Calculate the offset to the start of a character, skipping checksum bytes.
+    offset = HEADER_SIZE + ((CHARACTER_FILE_SIZE + CHECKSUM_SIZE) * i); 
+    // Move the cursor position to offset
     SetCursorPos( offset );
-    ReadBytes(buffer, offset + 0x10, 0x280000);
-    ChecksumAlgArrayBytes( CHECKSUM_MD5, result, buffer, 0x280000);
-    WriteBytes(result, offset, 0x10);
+    // Read the bytes to buffer
+    ReadBytes(buffer, offset + CHECKSUM_SIZE, CHARACTER_FILE_SIZE);
+    // Calculcate checksum from bytes.
+    ChecksumAlgArrayBytes( CHECKSUM_MD5, result, buffer, CHARACTER_FILE_SIZE);
+    // Overwrite old checksum with the new checksum.
+    WriteBytes(result, offset, CHECKSUM_SIZE);
+    // Increment index
     i++;
 }
 
 // Recalculate checksum for USER_DATA_10
-offset = 0x300 + (0x280010 * 10);
+offset = HEADER_SIZE + (CHARACTER_FILE_SIZE * MAX_CHARACTER_COUNT);
 SetCursorPos( offset );
-ReadBytes(buffer, offset + 0x10, 0x60000);
-ChecksumAlgArrayBytes( CHECKSUM_MD5, result, buffer, 0x60000);
-WriteBytes(result, offset, 0x10);
+ReadBytes(buffer, offset + CHECKSUM_SIZE, USERDATA_10_SIZE);
+ChecksumAlgArrayBytes( CHECKSUM_MD5, result, buffer, USERDATA_10_SIZE);
+WriteBytes(result, offset, CHECKSUM_SIZE);
 
 // Save file
 FileSave(og_name);
