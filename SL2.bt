@@ -114,7 +114,7 @@ typedef struct {
     uint32 unk0x8c ;
     uint32 CharacterType;
     wchar_t  CharacterName[0x10];
-    uint16 Terminator;
+    uint16 CharacterNameTerminator <hidden = true>; Assert(CharacterNameTerminator == 0);
     byte Gender;
     byte ArcheType;
     byte unk0xb8 ;
@@ -137,12 +137,18 @@ typedef struct {
     byte MaxCrimsonFlaskCount;
     byte MaxCeruleanFlaskCount;
     byte unk0xfb[0x15] ; 
-    wchar_t Password[0x9];
-    wchar_t GroupPassword1[0x9];
-    wchar_t GroupPassword2[0x9];
-    wchar_t GroupPassword3[0x9];
-    wchar_t GroupPassword4[0x9];
-    wchar_t GroupPassword5[0x9];
+    wchar_t Password[0x8];
+    uint16 PasswordTerminator <hidden = true>; Assert(PasswordTerminator == 0);
+    wchar_t GroupPassword1[0x8];
+    uint16 GroupPassword1Terminator <hidden = true>; Assert(GroupPassword1Terminator == 0);
+    wchar_t GroupPassword2[0x8];
+    uint16 GroupPassword2Terminator <hidden = true>; Assert(GroupPassword2Terminator == 0);
+    wchar_t GroupPassword3[0x8];
+    uint16 GroupPassword3Terminator <hidden = true>; Assert(GroupPassword3Terminator == 0);
+    wchar_t GroupPassword4[0x8];
+    uint16 GroupPassword4Terminator <hidden = true>; Assert(GroupPassword4Terminator == 0);
+    wchar_t GroupPassword5[0x8];
+    uint16 GroupPassword5Terminator <hidden = true>; Assert(GroupPassword5Terminator == 0);
     byte unk0x17c[0x34];
 } PlayerGameData;
 
@@ -705,32 +711,27 @@ typedef struct {
     }
 } CSWorldArea;
 
-// TODO: Clean up
-typedef struct (int &S) {
-    M MapID;
-    uint32 Size;
-    if ((Size - 8) > 0) {
-        byte Data[Size-8];
-    }
-    S = S - Size;
-} EntryData <optimize = false>;
 
-typedef struct (int &Size) {
+typedef struct (byte &done){
+    M MapID;
+    int32 Size;
+    uint64 unk0x8;
+    done = Size == 0;
+    if (Size > 0) {
+        byte Data[Size-0x10];
+    }
+} EntryData <optimize = false>;
+typedef struct{
     char magic[4];
     uint32 unk0x4 <format = hex>;
-    Size = Size - 20;
-    while (Size > 0) {
-        EntryData Entry(Size);
+    local byte done = false;
+    while (!done) {
+        EntryData Entry(done);
     }
-    uint64 unk0xxx <hidden = true>;
-    uint64 unk0xxx <hidden = true>;
 } CSSomething;
 typedef struct {
     int32 Size;
-    local int S = Size - 4;
-    if (S > 0) {
-        CSSomething Data (S);
-    }
+    CSSomething Data;
 } CSWorldGeomMan;
 
 
@@ -766,7 +767,7 @@ typedef struct {
 // Length 0x20004
 typedef struct {
     uint32 unk0x0 <hidden = true>;
-    Assert(unk0x0 == 2);
+    Assert(unk0x0 == 2 || unk0x0 == 0);
     byte CSNetManData[0x20000];
 } CSNetMan<size=0x20004>;
 
@@ -804,7 +805,7 @@ typedef struct {
     // Maybe a timer?
     uint32 Timer;
     uint32 padding <hidden = true>;
-} CSWorldAreaWeather<size=0xC>;
+} CSWorldAreaWeather;
 
 // WorldAreaTime
 // CS::WorldAreaTime
@@ -824,17 +825,8 @@ typedef struct {
 } BaseVersion;
 
 typedef struct {
-    uint64 unk0x0;
-    uint64 unk0x8;
-    uint64 unk0x10;
-    uint64 unk0x18;
-    uint64 unk0x20;
-    uint32 unk0x28;
-    uint32 unk0x2c;
-    uint32 unk0x30;
-    uint64 unk0x34;
-    uint32 unk0x3c;
-} CSPS5Activity <size = 0x20>;
+    ubyte Data[0x20];
+} CSPS5Activity;
 
 typedef struct {
     uint64 unk0x0;
@@ -884,7 +876,7 @@ typedef struct (
     uint EquippedWeapons <format = hex>;
     Assert(EquippedWeapons == 0 || EquippedWeapons == EquippedWeaponsHash(equipment));
     
-    // Equipped Weapons
+    // Equipped Armors and Talismans
     uint EquippedArmorsAndTalismans <format = hex>;
     Assert(EquippedArmorsAndTalismans == 0 || EquippedArmorsAndTalismans == EquippedArmorsAndTalismansHash(equipment));
 
@@ -973,7 +965,8 @@ typedef struct {
 } ProfileSummaryChrAsm;
 
 typedef struct {
-    wchar_t CharacterName[0x11];
+    wchar_t CharacterName[0x10];
+    uint16 CharacterNameTerminator <hidden = true>;
     int32 Level;
     int32 SecondsPlayed;
     int32 RuneMemory;
@@ -988,7 +981,7 @@ typedef struct {
     byte ProfileSummaryCharacter0x294;
     byte ProfileSummaryCharacter0x295;
     int32 ProfileSummaryCharacter0x298;
-} ProfileData <size = 0x24C, optimize = false> ;
+} ProfileData <optimize = false>;
 // CSProfileSummary
 typedef struct {
     SlotState IsProfileActive;
@@ -1031,9 +1024,9 @@ struct BND4FileHeader {
 // Character Slot
 struct Slot {
     // Checksum
-    byte checksum[0x10] <hidden = true>;
+    byte checksum[0x10];
     
-    // Patch version?
+    // Game Version
     uint32 Version;
     
     // MapID
@@ -1186,6 +1179,8 @@ struct Slot {
     
     // Version from when the character was created.
     BaseVersion BaseCharacterVersion;
+    
+    // SteamId
     uint64 SteamId;
     
     // PS5Activity
