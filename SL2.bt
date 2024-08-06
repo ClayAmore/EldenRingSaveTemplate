@@ -1037,7 +1037,7 @@ struct Slot {
     
     // GaitemMap count. It's two entries shorter on older patches.
     local int count = 0x1400;
-    if ( Version <= 80 ) {
+    if ( Version <= 81 ) {
         count = 0x13FE; 
     }
     
@@ -1212,9 +1212,13 @@ struct USER_DATA10{
     uint64 GameDataMan0x118;
 } Common <size=0x60010>;
 
+typedef char RegMagic[4] <read=Str("%s%s%s%s", this[3], this[2], this[1], this[0])>;
 struct USER_DATA11{
     byte checksum[0x10] <hidden = true>;
-    byte unk[0x10] <hidden = true>;
+    RegMagic Magic;
+    uint32 unk0x4;
+    uint32 Version;
+    uint32 Size <format=hex>;
     byte Regulation[0x1e9fb0];
 } Regulation<size=0x24001F>;
 
