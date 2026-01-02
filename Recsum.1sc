@@ -9,9 +9,7 @@
 //   History: 
 //------------------------------------------------
 
-int i = 0;
 uint64 offset;
-int slots_count = 0;
 int active_slots_offset = 0x1901D04;
 uchar buffer[0x280000];
 uchar result[0x10];
@@ -23,15 +21,10 @@ int CHECKSUM_SIZE = 0x10;
 int USERDATA_10_SIZE = 0x60000;
 int MAX_CHARACTER_COUNT = 10;
 
-// Count active slots
-while(i < 10) {
-    if((ReadByte(active_slots_offset + 0x1*i)) == 1) slots_count++;
-    i++;
-}
-
 // Recalculate checksum for active character slots
-i = 0;
-while(i < slots_count) {
+for(int i = 0; i < MAX_CHARACTER_COUNT; i++) {
+    // Check that slot is active. If not, skip.
+    if((ReadByte(active_slots_offset + i)) != 1) continue;
     // Calculate the offset to the start of a character, skipping checksum bytes.
     offset = HEADER_SIZE + ((CHARACTER_FILE_SIZE + CHECKSUM_SIZE) * i); 
     // Move the cursor position to offset
@@ -42,12 +35,10 @@ while(i < slots_count) {
     ChecksumAlgArrayBytes( CHECKSUM_MD5, result, buffer, CHARACTER_FILE_SIZE);
     // Overwrite old checksum with the new checksum.
     WriteBytes(result, offset, CHECKSUM_SIZE);
-    // Increment index
-    i++;
 }
 
 // Recalculate checksum for USER_DATA_10
-offset = HEADER_SIZE + (CHARACTER_FILE_SIZE * MAX_CHARACTER_COUNT);
+offset = HEADER_SIZE + ((CHARACTER_FILE_SIZE + CHECKSUM_SIZE) * MAX_CHARACTER_COUNT);
 SetCursorPos( offset );
 ReadBytes(buffer, offset + CHECKSUM_SIZE, USERDATA_10_SIZE);
 ChecksumAlgArrayBytes( CHECKSUM_MD5, result, buffer, USERDATA_10_SIZE);
